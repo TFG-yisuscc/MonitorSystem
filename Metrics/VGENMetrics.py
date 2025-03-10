@@ -39,5 +39,5 @@ class VCGENMetrics:
         self.throttling = int(cmd_output.split("=")[1])
         #memoria
         cmd_output = subprocess.check_output(["vcgencmd", "get_mem", "arm"]).decode("utf-8")
-        self.memory = int(cmd_output.split("=")[1][:-1])
+        self.memory = int(cmd_output.split("=")[1][:-2])
 
