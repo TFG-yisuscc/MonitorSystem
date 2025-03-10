@@ -16,7 +16,7 @@ class VCGENMetrics:
         self.voltage = float(cmd_output.split("=")[1][:-2])
         # trhottling
         cmd_output = subprocess.check_output(["vcgencmd", "get_throttled"]).decode("utf-8")
-        self.throttling = int(cmd_output.split("=")[1].split("\"")[0])
+        self.throttling = int(cmd_output.strip().split("=")[1].split("\"")[0],16)
         #memoria
         cmd_output = subprocess.check_output(["vcgencmd", "get_mem", "arm"]).decode("utf-8")
         self.memory = int(cmd_output.split("=")[1][:-1])
