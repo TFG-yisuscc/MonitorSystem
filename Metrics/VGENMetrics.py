@@ -7,7 +7,7 @@ class VCGENMetrics:
     def __init__(self):
         #temperatura  CPU
         cmd_output = subprocess.check_output(["vcgencmd", "measure_temp"]).decode("utf-8")
-        self.temperature = float(cmd_output.split("=")[1][:-3]) #TODO comprobar que funciona 
+        self.temperature = float(cmd_output.split("=")[1][:-3])
         #frecuecia
         cmd_output = subprocess.check_output(["vcgencmd", "measure_clock", "arm"]).decode("utf-8")
         self.frequency = int(cmd_output.split("=")[1])
@@ -19,7 +19,7 @@ class VCGENMetrics:
         self.throttling = int(cmd_output.strip().split("=")[1].split("\"")[0],16)
         #memoria
         cmd_output = subprocess.check_output(["vcgencmd", "get_mem", "arm"]).decode("utf-8")
-        self.memory = int(cmd_output.split("=")[1][:-1])
+        self.memory = int(cmd_output.split("=")[1][:-1].replace("M", ""))
 # to string
     def __str__(self):
         return f"Temperature: {self.temperature}, Frequency: {self.frequency}, Voltage: {self.voltage}, Throttling: {self.throttling}, Memory: {self.memory}"
@@ -27,7 +27,7 @@ class VCGENMetrics:
     def update(self):
             #temperatura  CPU
         cmd_output = subprocess.check_output(["vcgencmd", "measure_temp"]).decode("utf-8")
-        self.temperature = float(cmd_output.split("=")[1][:-3]) #TODO comprobar que funciona 
+        self.temperature = float(cmd_output.split("=")[1][:-3])
         #frecuecia
         cmd_output = subprocess.check_output(["vcgencmd", "measure_clock", "arm"]).decode("utf-8")
         self.frequency = int(cmd_output.split("=")[1])
