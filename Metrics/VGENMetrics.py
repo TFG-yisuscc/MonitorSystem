@@ -10,7 +10,7 @@ class VCGENMetrics:
         self.temperature = float(cmd_output.split("=")[1][:-3])
         #frecuecia
         cmd_output = subprocess.check_output(["vcgencmd", "measure_clock", "arm"]).decode("utf-8")
-        self.frequency = int(cmd_output.split("=")[1])
+        self.frequency = int(cmd_output.split("=")[1],16)
         #voltaje cpu
         cmd_output = subprocess.check_output(["vcgencmd", "measure_volts", "core"]).decode("utf-8")
         self.voltage = float(cmd_output.split("=")[1][:-2])
@@ -30,13 +30,13 @@ class VCGENMetrics:
         self.temperature = float(cmd_output.split("=")[1][:-3])
         #frecuecia
         cmd_output = subprocess.check_output(["vcgencmd", "measure_clock", "arm"]).decode("utf-8")
-        self.frequency = int(cmd_output.split("=")[1])
+        self.frequency = int(cmd_output.split("=")[1],16)
         #voltaje cpu
         cmd_output = subprocess.check_output(["vcgencmd", "measure_volts", "core"]).decode("utf-8")
         self.voltage = float(cmd_output.split("=")[1][:-2])
         # trhottling
         cmd_output = subprocess.check_output(["vcgencmd", "get_throttled"]).decode("utf-8")
-        self.throttling = int(cmd_output.split("=")[1])
+        self.throttling = int(cmd_output.split("=")[1],16)
         #memoria
         cmd_output = subprocess.check_output(["vcgencmd", "get_mem", "arm"]).decode("utf-8")
         self.memory = int(cmd_output.split("=")[1][:-1].replace("M",""))
