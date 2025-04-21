@@ -1,7 +1,7 @@
 from ollama import chat, ChatResponse, Client
 
 client = Client(
-  host='http://raspberrypi1.local:11434',
+  #host='http://raspberrypi2.local:11434',
   headers={'x-some-header': 'some-value'}
 )
 

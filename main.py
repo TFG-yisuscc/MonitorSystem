@@ -2,18 +2,11 @@ from Metrics.VGENMetrics import *
 from Metrics.mpstatMetrics import *
 from Prompt_Lists.prompt_parser import *
 from LLM_functions import *
+
 import time
 import threading
 import csv
-try:
-    import ollama
-except ImportError:
-    print("The 'ollama' module is not installed. Please install it in a virtual environment.")
-    print("To create a virtual environment, run:")
-    print("  python3 -m venv /path/to/venv")
-    print("Activate the virtual environment and install the module with:")
-    print("  /path/to/venv/bin/pip install ollama")
-    exit(1)
+
 
 m = mpstatMetrics()
 v = VCGENMetrics()
