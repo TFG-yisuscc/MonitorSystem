@@ -1,41 +1,49 @@
-from Metrics.VGENMetrics import *
-from Metrics.mpstatMetrics import *
-from Prompt_Lists.prompt_parser import *
-from LLM_functions import *
-
-import time
+#from metrics.VGENMetrics import *
+#from metrics.mpstatMetrics import *
+import subprocess
 import threading
+from utils.prompt_parser import InstructionFollowingParser as ifps
+from metrics.hardware_metrics import HardwareMetrics as hm 
+from utils.LLM_functions import query_llm as query 
+from metrics.prompt_metrics import prompt_metrics as pm
+import time
 import csv
 
+MODEL = "deepseek-r1:1.5b"
+FREQ =0.5 #in seconds 
+# obtenemos los prompts 
+list_prompt = ifps.get_instruc_eval_prompts()[0:3]
+#Filenames of archives
+current_time = time.time_ns()
+PROMPT_METRIC_FILEPATH =f"results/prompt_metrics_{current_time}_{MODEL}_{FREQ}.csv"
+HARDWARE_METRIC_FILEPATH =f"results/hardware_metrics_{current_time}_{MODEL}_{FREQ}.csv"
+#creamos los csv 
+hm.create_csv_file(HARDWARE_METRIC_FILEPATH);
+pm.create_csv_file(PROMPT_METRIC_FILEPATH);
 
-m = mpstatMetrics()
-v = VCGENMetrics()
-prompts = InstructionFollowingParser.get_prompts()
-
-# Función para guardar mediciones en un archivo CSV
-def save_metrics_to_csv():
-    with open('metrics.csv', mode='w', newline='') as file:
-        writer = csv.writer(file)
-        writer.writerow(['Timestamp', 'Metric_M', 'Metric_V'])  # Encabezados del CSV
-        while True:
-            timestamp = time.strftime('%Y-%m-%d %H:%M:%S')
-            m.update()
-            v.update()
-            writer.writerow([timestamp, str(m), str(v)])
-            file.flush()  # Asegurarse de que los datos se escriban inmediatamente
-            time.sleep(1)
-
-# Función para alimentar los prompts a ollama
-def feed_prompts_to_ollama():
-    model="gemma3:1b"
-    query_iterator(model, prompts[0:5])
+#intento malo de commparticion de variables
+prompt_actual = -1
 
 
-# Crear y ejecutar los hilos
-metrics_thread = threading.Thread(target=save_metrics_to_csv, daemon=True)
-prompts_thread = threading.Thread(target=feed_prompts_to_ollama)
+# creamos las funciones
+def mesuring_hardware(): 
+    while True: 
+        hm(prompt_actual).append_to_csv_file(HARDWARE_METRIC_FILEPATH);
+        time.sleep(FREQ)
 
-metrics_thread.start()
-prompts_thread.start()
+def feeding_prompts(): 
+    for i in range(len(list_prompt)): 
+        prompt_actual = i
+        query(MODEL,list_prompt[i],i).append_to_csv(PROMPT_METRIC_FILEPATH)
+        
+    
 
-prompts_thread.join()  # Esperar a que termine el hilo de prompts
+
+def main(): 
+    metric_thread = threading.Thread(target=mesuring_hardware,daemon=True); 
+    feeding_thread = threading.Thread(target=feeding_prompts); 
+    metric_thread.start()
+    feeding_thread.start(); 
+    feeding_thread.join()
+if __name__ == "__main__": 
+    main()

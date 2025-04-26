@@ -5,10 +5,10 @@ class InstructionFollowingParser:
   Instruction-Following Evaluation for Large Language Models
     """
     @staticmethod
-    def get_prompts():
-       
+    def get_instruc_eval_prompts():
         lista_prompts = []
-        ruta_fichero = "Prompt_Lists/instruction_following_eval_promt.jsonl"
+        ruta_fichero = "prompt_lists/instruction_following_eval_promt.jsonl"
+        #ruta_fichero = "/home/yisus/Documentos/TFG/MonitorSystem/prompt_lists/instruction_following_eval_promt.jsonl"
         with open(ruta_fichero,'r', encoding='utf-8')as fichero : 
             for l in fichero:
                 try:
