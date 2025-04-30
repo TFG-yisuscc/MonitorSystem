@@ -5,6 +5,7 @@ from metrics.hardware_metrics import HardwareMetrics as hm
 from metrics.promptmetrics import PromptMetrics as pm
 from utils.ollama_utils import ollama_model_checker
 from utils.prompt_parser import InstructionFollowingParser as ifps
+from utils.llm_utils import client_default_ollama as cdo 
 OLLAMA_MODEL_LIST = ["llama3.2:latest"]
 PROMPT_MODEL_LIST = ifps.get_instruc_eval_prompts()[0:2]
 
@@ -20,9 +21,9 @@ def main():
         #Creamos los csv
         current_time = time.time_ns()
         prompt_metric_filepath =f"results/prompt_metrics_{current_time}_{model}.csv"
-        # hardware_metric_filepath =f"results/hardware_metrics_{current_time}_{model}.csv"
+        hardware_metric_filepath =f"results/hardware_metrics_{current_time}_{model}.csv"
         pm.create_csv_file(prompt_metric_filepath)
-        # hm.create_csv_file(hardware_metric_filepath)
+        hm.create_csv_file(hardware_metric_filepath)
         for i in range (len(PROMPT_MODEL_LIST)):
             # de forma paralela alimentamos el prompts y medimos el hardware
 
@@ -30,10 +31,17 @@ def main():
             # alimento el prompt en este hilo
             prompt_thread = threading.Thread(
                 target=pm.ollama_query_and_save,
-                args=(PROMPT_MODEL_LIST[i], model, i,prompt_metric_filepath),
+                args=(PROMPT_MODEL_LIST[i], model,prompt_metric_filepath, cdo,i)
+            )
+            hardware_thread = threading.Thread(
+                target= hm.update_and_save,
+                args=(hardware_metric_filepath,i),
+                daemon=True
             )
             prompt_thread.start()
+            hardware_thread.start()
             prompt_thread.join()
+           
 
 
 if __name__ == "__main__":

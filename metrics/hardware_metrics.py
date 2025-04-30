@@ -103,3 +103,10 @@ class HardwareMetrics:
             writer.writerow(row)
             file.flush()
         return row
+    @staticmethod
+    def update_and_save(filepath:str,prompt_id:int=-1): 
+        while True: #TODO mejorar  update 
+            HardwareMetrics(prompt_id).append_to_csv_file(filepath)
+            # TODO Frecuencia Configurable
+            time.sleep(1); 
+
