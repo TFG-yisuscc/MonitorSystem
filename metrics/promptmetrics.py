@@ -75,6 +75,7 @@ class PromptMetrics:
         finish = time.time_ns()
         print(response.message.content)
         return PromptMetrics.ollama_pseudoconstructor(start, finish, response, prompt_id)
+
     def query_llama_cpp(self, prompt:str, model:str, client:Llama ,prompt_id:int= -1) -> 'PromptMetrics':
         """
         Queries the llama_cpp API and returns a prompt_metrics object
@@ -109,6 +110,13 @@ class PromptMetrics:
             writer.writerow(row)
             file.flush()
         return row
+    @staticmethod
+    def ollama_query_and_save(prompt:str, model:str, filepath,client:Client=cd_ollama ,prompt_id:int= -1,keep_alive=1,):
+        """
+        Unifies the Queries the ollama API and saves the result to a CSV file
+        Useful for threads
+        """
+        PromptMetrics.query_ollama(prompt, model, client, prompt_id, keep_alive).append_to_csv()
 
 
 
