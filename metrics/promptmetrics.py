@@ -73,7 +73,6 @@ class PromptMetrics:
         start= time.time_ns()
         response: GenerateResponse = client.generate(prompt=prompt, model=model, keep_alive=keep_alive)
         finish = time.time_ns()
-        print(response.response)
         return PromptMetrics.ollama_pseudoconstructor(start, finish, response, prompt_id)
 
     def query_llama_cpp(self, prompt:str, model:str, client:Llama ,prompt_id:int= -1) -> 'PromptMetrics':
@@ -90,8 +89,8 @@ class PromptMetrics:
     #TODO: investigate further to use logs instead of csv
     @staticmethod
     def csv_header()-> list[str]:
-        return ['start_timestamp', 'finish_timestamp', 'model', 'total_duration',
-                'prompt_eval_count', 'prompt_eval_duration', 'eval_count', 'load_duration','answer','prompt_id']
+        return ['prompt_id','start_timestamp', 'finish_timestamp', 'model', 'total_duration',
+                'prompt_eval_count', 'prompt_eval_duration', 'eval_count', 'load_duration']
 
     @staticmethod
     def create_csv_file(filename: str):

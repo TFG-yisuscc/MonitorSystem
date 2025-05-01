@@ -1,4 +1,4 @@
-import threading
+from threading import Thread, Lock, Event
 import time
 
 from metrics.hardware_metrics import HardwareMetrics as hm
@@ -25,22 +25,31 @@ def main():
         pm.create_csv_file(prompt_metric_filepath)
         hm.create_csv_file(hardware_metric_filepath)
         for i in range (len(PROMPT_MODEL_LIST)):
+           
             # de forma paralela alimentamos el prompts y medimos el hardware
 
             # en un hilo daemon guardo los resultados de la medicion del hardware
             # alimento el prompt en este hilo
-            prompt_thread = threading.Thread(
+            event = Event()
+            prompt_thread = Thread(
                 target=pm.ollama_query_and_save,
                 args=(PROMPT_MODEL_LIST[i], model,prompt_metric_filepath, cdo,i)
             )
-            hardware_thread = threading.Thread(
+            hardware_thread = Thread(
                 target= hm.update_and_save,
-                args=(hardware_metric_filepath,i),
+                args=(hardware_metric_filepath,event,i),
                 daemon=True
             )
             prompt_thread.start()
             hardware_thread.start()
             prompt_thread.join()
+            event.set()
+            hardware_thread.join()
+            
+            
+
+            
+            #necesito que el hilo hardware se muera 
            
 
 
