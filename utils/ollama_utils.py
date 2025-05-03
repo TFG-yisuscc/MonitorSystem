@@ -14,6 +14,7 @@ def ollama_model_checker(model_list: list[str]):
 
     #por cada elemento compruebo si ollama lo tiene idescargado y si no lo descargo
     for model in model_list:
+        model= model.strip()
         try:
             ollama.show(model)
         except ollama.ResponseError as e:
@@ -32,7 +33,6 @@ def ollama_model_checker(model_list: list[str]):
 
 
 
-    #
 client_default_ollama= Client(
   #host='http://raspberrypi2.local:11434',
   headers={'x-some-header': 'some-value'}

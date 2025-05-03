@@ -6,7 +6,7 @@ from metrics.promptmetrics import PromptMetrics as pm
 from utils.ollama_utils import ollama_model_checker
 from utils.prompt_parser import InstructionFollowingParser as ifps
 from utils.llm_utils import client_default_ollama as cdo 
-OLLAMA_MODEL_LIST = ["llama3.2:latest",""]
+OLLAMA_MODEL_LIST = ["llama3.2:latest","phi4-mini:latest","deepseek-r1:1.5b"]
 PROMPT_MODEL_LIST = ifps.get_instruc_eval_prompts()[0:2]
 
 
