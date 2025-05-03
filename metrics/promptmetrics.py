@@ -69,7 +69,7 @@ class PromptMetrics:
         """
         Queries the ollama API and returns a prompt_metrics object
         """
-        #TODO: añadir paramaetro por defecto a client
+       
         start= time.time_ns()
         response: GenerateResponse = client.generate(prompt=prompt, model=model, keep_alive=keep_alive)
         finish = time.time_ns()
@@ -89,11 +89,17 @@ class PromptMetrics:
     #TODO: investigate further to use logs instead of csv
     @staticmethod
     def csv_header()-> list[str]:
+        """
+        Returns a CSV--like header 
+        """
         return ['prompt_id','start_timestamp', 'finish_timestamp', 'model', 'total_duration',
                 'prompt_eval_count', 'prompt_eval_duration', 'eval_count', 'load_duration']
 
     @staticmethod
     def create_csv_file(filename: str):
+        """
+        Creates a CSV and appendst the header 
+        """
         with open(filename, mode='w', newline='') as file:
             writer = csv.writer(file)
             writer.writerow(PromptMetrics.csv_header())

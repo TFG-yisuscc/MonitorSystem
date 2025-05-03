@@ -14,6 +14,7 @@ import os
 import subprocess
 import time
 import psutil 
+
 from threading import Thread, Lock, Event
 class HardwareMetrics:
     def __init__(self,prompt_id=-1):
@@ -45,7 +46,7 @@ class HardwareMetrics:
         self.mem_used  = mem.used;
         self.mem_percent= mem.percent;
 
-        try:
+        try: #TODO with olllam it doesn work since its a different pid from the script
             pid = os.getpid()
             process = psutil.Process(pid)
             self.mem_pid = process.memory_info().rss;
@@ -72,6 +73,8 @@ class HardwareMetrics:
                 self.fan_speed = -1
         except:
             self.fan_speed = -1
+        
+        self.hailo_temp
                
 
 
@@ -83,8 +86,6 @@ class HardwareMetrics:
     
     @staticmethod
     def csv_header()->list[str]:
-        # Not ideal, it doesn change if we add new metrics
-
         return ['timestamp', 'prompt_id', 'temperature', 'frequency', 'voltage', 'throttling',
                 'mem_total', 'mem_used', 'mem_percent', 'mem_pid', 'cpu_usage_pid',
                 'swap_total', 'swap_used', 'swap_percent', 'cpu_usage', 'fan_speed']
