@@ -46,7 +46,7 @@ class HardwareMetrics:
         self.mem_used  = mem.used;
         self.mem_percent= mem.percent;
 
-        try: #TODO with olllam it doesn work since its a different pid from the script
+        try: #TODO with olllam it doesn work since it uses different pid from the script, check with llama
             pid = os.getpid()
             process = psutil.Process(pid)
             self.mem_pid = process.memory_info().rss;
@@ -74,8 +74,7 @@ class HardwareMetrics:
         except:
             self.fan_speed = -1
         
-        self.hailo_temp
-               
+      
 
 
     def update(self):

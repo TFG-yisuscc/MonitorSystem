@@ -15,13 +15,13 @@ Apart from the ollama metrics, the class contains functions for making queries a
 import time
 
 from ollama import chat, ChatResponse, Client, GenerateResponse
+from utils.llama_utils import LLamaPerfomanceMetrics
 from utils.llm_utils import client_default_ollama as cd_ollama
 from llama_cpp import Llama
 import csv
 from dataclasses import dataclass, field
 @dataclass
 class PromptMetrics:
-    # Indentifies tne prompt answer relative to the rest
     start_timestamp:int  # nanoseconds
     finish_timestamp:int  # nanoseconds
     model:str
@@ -31,7 +31,7 @@ class PromptMetrics:
     eval_count:int
     load_duration :int
     answer: str
-    prompt_id: int = field(default=-1)
+    prompt_id: int = field(default=-1)# Indentifies tne prompt answer relative to the rest
     # NOTE lantency in tokesn per second has been omitted since it can be derivated
     #and thus calculated later, the formula is(according to ollama documentation):
     # eval_count / eval_duration * 10^9.
@@ -55,10 +55,10 @@ class PromptMetrics:
         return PromptMetrics(starting_timestamp, finish_timestamp, model, total_duration,
                              prompt_eval_count, prompt_eval_duration, eval_count, load_duration, answer, prompt_id)
     @staticmethod
-    def llama_cpp_pseudoconstructor()-> 'PromptMetrics':
+    def llama_cpp_pseudoconstructor(starting_timestamp:int,finish_timestamp:int, Perf:LLamaPerfomanceMetrics,prompt_id:int= -1)-> 'PromptMetrics':
         """
        PSeudo  Constructor for the prompt_metrics class
-         NOTE: WIP, the parameters are for placeholder purposes
+    
         """
         #TODO :
         pass
@@ -74,14 +74,24 @@ class PromptMetrics:
         response: GenerateResponse = client.generate(prompt=prompt, model=model, keep_alive=keep_alive)
         finish = time.time_ns()
         return PromptMetrics.ollama_pseudoconstructor(start, finish, response, prompt_id)
-
-    def query_llama_cpp(self, prompt:str, model:str, client:Llama ,prompt_id:int= -1) -> 'PromptMetrics':
+    @staticmethod
+    def query_llama_cpp(self, prompt:str, llm:Llama ,prompt_id:int= -1) -> 'PromptMetrics':
         """
-        Queries the llama_cpp API and returns a prompt_metrics object
+        Queries the llama_cpp API and returns a prompt_metrics object, The llm given as a parameter should be already configured as desired
+        inculding the rperformance options
         NOTE: WIP, the parameters are for placeholder purposes
         """
-        #TODO: investiga más a fondo como funciona llama_cpp que se te está convirtiendo el código en spaghetti code
-        pass
+        start= time.time_ns()
+        #We query the machine
+        response= llm(prompt)
+        finish = time.time_ns()
+        #we get the performance metrics 
+        return response
+
+    
+    
+
+        
 
 
 

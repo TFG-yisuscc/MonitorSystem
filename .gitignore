@@ -144,7 +144,7 @@ venv.bak/
 # Spyder project settings
 .spyderproject
 .spyproject
-
+.gguf 
 # Rope project settings
 .ropeproject
 
@@ -177,3 +177,4 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+test.py
