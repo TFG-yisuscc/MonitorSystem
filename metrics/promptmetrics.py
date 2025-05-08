@@ -15,7 +15,7 @@ Apart from the ollama metrics, the class contains functions for making queries a
 import time
 
 from ollama import chat, ChatResponse, Client, GenerateResponse
-from utils.llama_utils import LLamaPerfomanceMetrics
+from utils.llama_utils import LLamaPerfomanceMetrics as lpm
 from utils.llm_utils import client_default_ollama as cd_ollama
 from llama_cpp import Llama
 import csv
@@ -29,8 +29,9 @@ class PromptMetrics:
     prompt_eval_count:int
     prompt_eval_duration:int
     eval_count:int
+    eval_duration:int
     load_duration :int
-    answer: str
+    #answer: str
     prompt_id: int = field(default=-1)# Indentifies tne prompt answer relative to the rest
     # NOTE lantency in tokesn per second has been omitted since it can be derivated
     #and thus calculated later, the formula is(according to ollama documentation):
@@ -47,21 +48,28 @@ class PromptMetrics:
 
         model:str = prompt_answer.model
         total_duration:int = prompt_answer.total_duration
-        prompt_eval_count:int = prompt_answer.prompt_eval_count
-        prompt_eval_duration:int= prompt_answer.prompt_eval_duration
-        eval_count:int = prompt_answer.eval_count
-        load_duration:int= prompt_answer.load_duration
-        answer: str = prompt_answer.response
+        prompt_eval_count:int = int(prompt_answer.prompt_eval_count)
+        prompt_eval_duration:int= int(prompt_answer.prompt_eval_duration)
+        eval_count:int = int(prompt_answer.eval_count)
+        eval_duration:int = int(prompt_answer.eval_duration)
+        load_duration:int= int(prompt_answer.load_duration)
+        #answer: str = prompt_answer.response
         return PromptMetrics(starting_timestamp, finish_timestamp, model, total_duration,
-                             prompt_eval_count, prompt_eval_duration, eval_count, load_duration, answer, prompt_id)
+                             prompt_eval_count, prompt_eval_duration, eval_count, eval_duration,load_duration, prompt_id)
     @staticmethod
-    def llama_cpp_pseudoconstructor(starting_timestamp:int,finish_timestamp:int, Perf:LLamaPerfomanceMetrics,prompt_id:int= -1)-> 'PromptMetrics':
+    def llama_cpp_pseudoconstructor(starting_timestamp:int,finish_timestamp:int, Perf:lpm,model:str, prompt_id:int= -1)-> 'PromptMetrics':
         """
        PSeudo  Constructor for the prompt_metrics class
     
         """
-        #TODO :
-        pass
+        total_duration = starting_timestamp - finish_timestamp #TODO check for better solutions later
+        prompt_eval_count:int = Perf.n_p_eval
+        prompt_eval_duration:int= Perf.t_p_eval_ns
+        eval_count:int = Perf.n_eval
+        eval_duration:int = Perf.t_eval_ns
+        load_duration:int= Perf.t_load_ns
+        return PromptMetrics(starting_timestamp, finish_timestamp, model,total_duration,prompt_eval_count,prompt_eval_duration,eval_count,eval_duration,load_duration,prompt_id)
+        
 
     #Query related functions
     @staticmethod
@@ -75,7 +83,7 @@ class PromptMetrics:
         finish = time.time_ns()
         return PromptMetrics.ollama_pseudoconstructor(start, finish, response, prompt_id)
     @staticmethod
-    def query_llama_cpp(self, prompt:str, llm:Llama ,prompt_id:int= -1) -> 'PromptMetrics':
+    def query_llama_cpp(prompt:str, llm:Llama ,modelName:str="",prompt_id:int=-1) -> 'PromptMetrics':
         """
         Queries the llama_cpp API and returns a prompt_metrics object, The llm given as a parameter should be already configured as desired
         inculding the rperformance options
@@ -85,15 +93,8 @@ class PromptMetrics:
         #We query the machine
         response= llm(prompt)
         finish = time.time_ns()
-        #we get the performance metrics 
-        return response
-
-    
-    
-
         
-
-
+        return  PromptMetrics.llama_cpp_pseudoconstructor(start,finish, lpm.pseudoconstructor(llm),modelName,prompt_id)
 
    #CSV related functions
     #TODO: investigate further to use logs instead of csv
@@ -103,7 +104,7 @@ class PromptMetrics:
         Returns a CSV--like header 
         """
         return ['prompt_id','start_timestamp', 'finish_timestamp', 'model', 'total_duration',
-                'prompt_eval_count', 'prompt_eval_duration', 'eval_count', 'load_duration']
+                'prompt_eval_count', 'prompt_eval_duration', 'eval_count', 'eval_duration', 'load_duration']
 
     @staticmethod
     def create_csv_file(filename: str):
