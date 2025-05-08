@@ -14,8 +14,9 @@ import os
 import subprocess
 import time
 import psutil 
-
+from utils.configuration import FRECUENCY as freq
 from threading import Thread, Lock, Event
+
 class HardwareMetrics:
     def __init__(self,prompt_id=-1):
         self.timestamp = time.time_ns();# nanoseconds
@@ -105,12 +106,12 @@ class HardwareMetrics:
             file.flush()
         return row
     @staticmethod
-    def update_and_save(filepath:str,event:Event, prompt_id:int=-1): 
-        while not event.is_set(): #TODO mejorar  update 
+    def update_and_save(filepath:str,event:Event, prompt_id:int=-1):
+        HardwareMetrics()
+        event.wait()
+        while event.is_set(): #TODO mejorar con update
             HardwareMetrics(prompt_id).append_to_csv_file(filepath)
-            # TODO Frecuencia Configurable
-            if not event.is_set():
-                time.sleep(1)
-            else: break
+            time.sleep(freq)
+            
     
 
