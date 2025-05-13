@@ -20,6 +20,7 @@ from utils.llm_utils import client_default_ollama as cd_ollama
 from llama_cpp import Llama
 from dataclasses import dataclass, field
 from threading import Event
+from threading import Event
 @dataclass
 class PromptMetrics:
     start_timestamp:int  # nanoseconds
@@ -82,26 +83,6 @@ class PromptMetrics:
         response: GenerateResponse = client.generate(prompt=prompt, model=model, keep_alive=keep_alive)
         finish = time.time_ns()
         return PromptMetrics.ollama_pseudoconstructor(start, finish, response, prompt_id)
-
-    @staticmethod
-    def query_ollama_with_event(prompt:str, model:str,event:Event,client:Client=cd_ollama, prompt_id:int= -1,keep_alive='2m') -> 'PromptMetrics':
-        """
-        Queries the ollama API and returns a prompt_metrics object
-        """
-        event.set()
-        start= time.time_ns()
-        response: GenerateResponse = client.generate(prompt=prompt, model=model, keep_alive=keep_alive)
-        finish = time.time_ns()
-        event.clear()
-        return PromptMetrics.ollama_pseudoconstructor(start, finish, response, prompt_id)
-    @staticmethod
-    def unload_model_ollama( model:str, client:Client=cd_ollama):
-        """
-        Sends an empty prompt with  zeroed keepalive
-        """
-        response: GenerateResponse = client.generate(prompt='', model=model, keep_alive=0)
-        
-
     @staticmethod
     def query_llama_cpp(prompt:str, llm:Llama ,modelName:str="",prompt_id:int=-1) -> 'PromptMetrics':
         """

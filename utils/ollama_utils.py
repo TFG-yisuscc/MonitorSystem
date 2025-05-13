@@ -30,10 +30,3 @@ def ollama_model_checker(model_list: list[str]):
                 print(f"The model {model} has been succesfully downloaded")
         else:
             print(f"Model {model} already downloaded")
-
-
-
-client_default_ollama= Client(
-  #host='http://raspberrypi2.local:11434',
-  headers={'x-some-header': 'some-value'}
-)

@@ -5,7 +5,7 @@ from metrics.hardware_metrics import HardwareMetrics as hm
 from metrics.promptmetrics import PromptMetrics as pm
 from utils.ollama_utils import ollama_model_checker
 from utils.prompt_parser import InstructionFollowingParser as ifps
-from utils.llm_utils import client_default_ollama as cdo 
+from utils.configuration import client_default_ollama as cdo 
 from utils.configuration import TIME_BETWEEN_MODELS as tbm, TIME_BETWEEN_PROMPTS as tbp, OLLAMA_MODEL_LIST as oml, PROMPT_LIST as pl
 
 

@@ -61,10 +61,6 @@ class HardwareMetrics:
         self.swap_total = swap.total;
         self.swap_used = swap.used;
         self.swap_percent = swap.percent;
-        #https://www.raspberrypi.com/documentation/computers/config_txt.html#overclocking-options
-        #https://psutil.readthedocs.io/en/latest/#system-related-functions
-    #OJO: puede serbloqueante, si no tiene si le indicamos un intervalo.
-        #
         self.cpu_usage = psutil.cpu_percent();
         
         try: 
@@ -107,7 +103,11 @@ class HardwareMetrics:
         return row
     @staticmethod
     def update_and_save(filepath:str,event:Event, prompt_id:int=-1):
-        HardwareMetrics()
+        """
+        
+        When the eent is set, Update the hardware metrics and save them to a CSV file every freq seconds
+        """
+        HardwareMetrics() # this is done to avoid getting a 0.0 cpu freq
         event.wait()
         while event.is_set(): #TODO mejorar con update
             HardwareMetrics(prompt_id).append_to_csv_file(filepath)
