@@ -54,7 +54,7 @@ class PromptMetrics:
         eval_count:int = prompt_answer.eval_count
         eval_duration:int = prompt_answer.eval_duration
         load_duration:int= prompt_answer.load_duration
-        #answer: str = prompt_answer.response
+       
         return PromptMetrics(starting_timestamp, finish_timestamp, model, total_duration,
                              prompt_eval_count, prompt_eval_duration, eval_count, eval_duration,load_duration, prompt_id)
     @staticmethod
@@ -70,31 +70,6 @@ class PromptMetrics:
         eval_duration:int = Perf.t_eval_ns
         load_duration:int= Perf.t_load_ns
         return PromptMetrics(starting_timestamp, finish_timestamp, model,total_duration,prompt_eval_count,prompt_eval_duration,eval_count,eval_duration,load_duration,prompt_id)
-        
-
-    #Query and prompt related functions
-    @staticmethod
-    def query_ollama(prompt:str, model:str, client:Client=cd_ollama ,prompt_id:int= -1,keep_alive='2m') -> 'PromptMetrics':
-        """
-        Queries the ollama API and returns a prompt_metrics object
-        """
-        
-        start= time.time_ns()
-        response: GenerateResponse = client.generate(prompt=prompt, model=model, keep_alive=keep_alive)
-        finish = time.time_ns()
-        return PromptMetrics.ollama_pseudoconstructor(start, finish, response, prompt_id)
-    
-    @staticmethod
-    def query_ollama_with_event(prompt:str, model:str,event:Event, client:Client=cd_ollama ,prompt_id:int= -1,keep_alive='2m')-> 'PromptMetrics':
-       
-        start= time.time_ns()
-        event.set()
-        response: GenerateResponse = client.generate(prompt=prompt, model=model, keep_alive=keep_alive)
-        finish = time.time_ns()
-        event.clear()
-        return PromptMetrics.ollama_pseudoconstructor(start,finish,response,prompt_id)
-    
-    
 
     @staticmethod
     def query_llama_cpp(prompt:str, llm:Llama ,modelName:str="",prompt_id:int=-1) -> 'PromptMetrics':
@@ -140,25 +115,10 @@ class PromptMetrics:
             writer.writerow(row)
             file.flush()
         return row
-    @staticmethod
-    def ollama_query_and_save(prompt: str, model: str, filepath: str, client: Client = cd_ollama, prompt_id: int = -1, keep_alive = 1):
-        """
-        Unifies the Queries the ollama API and saves the result to a CSV file
-        Useful for threads
-        """
-        PromptMetrics.query_ollama(prompt, model, client, prompt_id, keep_alive).append_to_csv(filepath)
 
-    @staticmethod
-    def ollama_query_and_save_with_event(prompt: str, model:str, filepath: str, event: Event, client: Client = cd_ollama, prompt_id = -1, keep_alive: int = 1):
-        """
-        Unifies the Queries the ollama API and saves the result to a CSV file
-        Useful for threads
-        """
-        PromptMetrics.query_ollama_with_event(prompt,model,event,client,prompt_id,keep_alive).append_to_csv(filepath)
 
-    @staticmethod
-    def unload_model_ollama( model:str,client: Client = cd_ollama):
-        client.generate(prompt='', model=model, keep_alive=0)
+
+
         
     
 
