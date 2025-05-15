@@ -1,13 +1,11 @@
-from threading import Thread, Lock, Event
-import time
+from threading import Thread, Event
 from datetime import datetime
 from metrics.hardware_metrics import HardwareMetrics as hm
 from metrics.promptmetrics import PromptMetrics as pm
 from utils.ollama_utils import ollama_model_checker
-from utils.prompt_parser import InstructionFollowingParser as ifps
 from utils.configuration import client_default_ollama as cdo 
 from utils.configuration import TIME_BETWEEN_MODELS as tbm, TIME_BETWEEN_PROMPTS as tbp, OLLAMA_MODEL_LIST as oml, PROMPT_LIST as pl
-
+import time
 
 
 def main_ollama():
@@ -20,8 +18,8 @@ def main_ollama():
     for model in oml:
         
         current_time = datetime.now().strftime("%Y-%m-%d-%H-%M")
-        prompt_metric_filepath =f"results/ollama/prompt_metrics_ollama_{current_time}_{model}.csv"
-        hardware_metric_filepath =f"results/ollama/hardware_metrics_ollama_{current_time}_{model}.csv"
+        prompt_metric_filepath =f"results/ollama_prompt_metrics_ollama_{current_time}_{model}.csv"
+        hardware_metric_filepath =f"results/ollama_hardware_metrics_ollama_{current_time}_{model}.csv"
         pm.create_csv_file(prompt_metric_filepath)
         hm.create_csv_file(hardware_metric_filepath)
         

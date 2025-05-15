@@ -16,7 +16,7 @@ import time
 import csv
 from ollama import chat, ChatResponse, Client, GenerateResponse
 from utils.llama_utils import LLamaPerfomanceMetrics as lpm
-from utils.llm_utils import client_default_ollama as cd_ollama
+from utils.configuration import client_default_ollama as cd_ollama
 from llama_cpp import Llama
 from dataclasses import dataclass, field
 from threading import Event
@@ -83,6 +83,19 @@ class PromptMetrics:
         response: GenerateResponse = client.generate(prompt=prompt, model=model, keep_alive=keep_alive)
         finish = time.time_ns()
         return PromptMetrics.ollama_pseudoconstructor(start, finish, response, prompt_id)
+    
+    @staticmethod
+    def query_ollama_with_event(prompt:str, model:str,event:Event, client:Client=cd_ollama ,prompt_id:int= -1,keep_alive='2m')-> 'PromptMetrics':
+       
+        start= time.time_ns()
+        event.set()
+        response: GenerateResponse = client.generate(prompt=prompt, model=model, keep_alive=keep_alive)
+        finish = time.time_ns()
+        event.clear()
+        return PromptMetrics.ollama_pseudoconstructor(start,finish,response,prompt_id)
+    
+    
+
     @staticmethod
     def query_llama_cpp(prompt:str, llm:Llama ,modelName:str="",prompt_id:int=-1) -> 'PromptMetrics':
         """
@@ -128,7 +141,7 @@ class PromptMetrics:
             file.flush()
         return row
     @staticmethod
-    def ollama_query_and_save(prompt: str, model: str, filepath: str, client: Client = cd_ollama, prompt_id: int = -1, keep_alive: int = 1):
+    def ollama_query_and_save(prompt: str, model: str, filepath: str, client: Client = cd_ollama, prompt_id: int = -1, keep_alive = 1):
         """
         Unifies the Queries the ollama API and saves the result to a CSV file
         Useful for threads
@@ -136,12 +149,17 @@ class PromptMetrics:
         PromptMetrics.query_ollama(prompt, model, client, prompt_id, keep_alive).append_to_csv(filepath)
 
     @staticmethod
-    def ollama_query_and_save_with_event(prompt: str, model:str, filepath: str, event: Event, client: Client = cd_ollama, prompt_id: int = -1, keep_alive: int = 1):
+    def ollama_query_and_save_with_event(prompt: str, model:str, filepath: str, event: Event, client: Client = cd_ollama, prompt_id = -1, keep_alive: int = 1):
         """
         Unifies the Queries the ollama API and saves the result to a CSV file
         Useful for threads
         """
         PromptMetrics.query_ollama_with_event(prompt,model,event,client,prompt_id,keep_alive).append_to_csv(filepath)
+
+    @staticmethod
+    def unload_model_ollama( model:str,client: Client = cd_ollama):
+        client.generate(prompt='', model=model, keep_alive=0)
+        
     
 
 
