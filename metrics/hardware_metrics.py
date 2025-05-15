@@ -14,6 +14,9 @@ import os
 import subprocess
 import time
 import psutil 
+from utils.configuration import FRECUENCY as freq
+from threading import Thread, Lock, Event
+
 class HardwareMetrics:
     def __init__(self,prompt_id=-1):
         self.timestamp = time.time_ns();# nanoseconds
@@ -44,7 +47,7 @@ class HardwareMetrics:
         self.mem_used  = mem.used;
         self.mem_percent= mem.percent;
 
-        try:
+        try: #TODO with olllam it doesn work since it uses different pid from the script, check with llama
             pid = os.getpid()
             process = psutil.Process(pid)
             self.mem_pid = process.memory_info().rss;
@@ -58,10 +61,6 @@ class HardwareMetrics:
         self.swap_total = swap.total;
         self.swap_used = swap.used;
         self.swap_percent = swap.percent;
-        #https://www.raspberrypi.com/documentation/computers/config_txt.html#overclocking-options
-        #https://psutil.readthedocs.io/en/latest/#system-related-functions
-    #OJO: puede serbloqueante, si no tiene si le indicamos un intervalo.
-        #
         self.cpu_usage = psutil.cpu_percent();
         
         try: 
@@ -71,7 +70,8 @@ class HardwareMetrics:
                 self.fan_speed = -1
         except:
             self.fan_speed = -1
-               
+        
+      
 
 
     def update(self):
@@ -82,8 +82,6 @@ class HardwareMetrics:
     
     @staticmethod
     def csv_header()->list[str]:
-        # Not ideal, it doesn change if we add new metrics
-
         return ['timestamp', 'prompt_id', 'temperature', 'frequency', 'voltage', 'throttling',
                 'mem_total', 'mem_used', 'mem_percent', 'mem_pid', 'cpu_usage_pid',
                 'swap_total', 'swap_used', 'swap_percent', 'cpu_usage', 'fan_speed']
@@ -103,3 +101,17 @@ class HardwareMetrics:
             writer.writerow(row)
             file.flush()
         return row
+    @staticmethod
+    def update_and_save(filepath:str,event:Event, prompt_id:int=-1):
+        """
+        
+        When the eent is set, Update the hardware metrics and save them to a CSV file every freq seconds
+        """
+        HardwareMetrics() # this is done to avoid getting a 0.0 cpu freq
+        event.wait()
+        while event.is_set(): #TODO mejorar con update
+            HardwareMetrics(prompt_id).append_to_csv_file(filepath)
+            time.sleep(freq)
+            
+    
+
