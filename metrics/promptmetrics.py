@@ -14,13 +14,13 @@ Apart from the ollama metrics, the class contains functions for making queries a
 """
 import time
 import csv
-from ollama import chat, ChatResponse, Client, GenerateResponse
-from utils.llama_utils import LLamaPerfomanceMetrics as lpm
-from utils.configuration import client_default_ollama as cd_ollama
-from llama_cpp import Llama
 from dataclasses import dataclass, field
 from threading import Event
-from threading import Event
+from ollama import chat, ChatResponse, Client, GenerateResponse
+from utils.llamaperformancemetrics import LLamaPerfomanceMetrics as lpm
+from utils.configuration import client_default_ollama as cd_ollama
+
+
 @dataclass
 class PromptMetrics:
     start_timestamp:int  # nanoseconds
@@ -63,6 +63,7 @@ class PromptMetrics:
        PSeudo  Constructor for the prompt_metrics class
     
         """
+
         total_duration = starting_timestamp - finish_timestamp #TODO check for better solutions later
         prompt_eval_count:int = Perf.n_p_eval
         prompt_eval_duration:int= Perf.t_p_eval_ns
@@ -72,18 +73,7 @@ class PromptMetrics:
         return PromptMetrics(starting_timestamp, finish_timestamp, model,total_duration,prompt_eval_count,prompt_eval_duration,eval_count,eval_duration,load_duration,prompt_id)
 
     @staticmethod
-    def query_llama_cpp(prompt:str, llm:Llama ,modelName:str="",prompt_id:int=-1) -> 'PromptMetrics':
-        """
-        Queries the llama_cpp API and returns a prompt_metrics object, The llm given as a parameter should be already configured as desired
-        inculding the rperformance options
-        NOTE: WIP, the parameters are for placeholder purposes
-        """
-        start= time.time_ns()
-        #We query the machine
-        response= llm(prompt)
-        finish = time.time_ns()
-        
-        return  PromptMetrics.llama_cpp_pseudoconstructor(start,finish, lpm.pseudoconstructor(llm),modelName,prompt_id)
+ 
 
    #CSV related functions
     #TODO: investigate further to use logs instead of csv
