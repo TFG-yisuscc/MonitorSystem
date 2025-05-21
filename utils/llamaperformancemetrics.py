@@ -31,3 +31,4 @@ class LLamaPerfomanceMetrics:
         t_p_eval_ns = param.t_p_eval_ms *1e6
         t_eval_ns = param.t_eval_ms*1e6
         return  LLamaPerfomanceMetrics(t_start_ns,t_load_ns, t_p_eval_ns, t_eval_ns, param.n_p_eval, param.n_eval)
+    

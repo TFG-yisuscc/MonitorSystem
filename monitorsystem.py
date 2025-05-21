@@ -3,6 +3,7 @@ from datetime import datetime
 from metrics.hardware_metrics import HardwareMetrics as hm
 from metrics.promptmetrics import PromptMetrics as pm
 from utils.ollama_utils import ollama_model_checker,ollamaClient
+from utils.llama_utils import LlamaModels
 from utils.configuration import client_default_ollama as cdo 
 from utils.configuration import TIME_BETWEEN_MODELS as tbm, TIME_BETWEEN_PROMPTS as tbp, OLLAMA_MODEL_LIST as oml, PROMPT_LIST as pl
 import time
@@ -53,8 +54,14 @@ def main_ollama():
             time.sleep(tbp)
         time.sleep(tbm)
            
-            
-            
+def main_llama(): 
+    fichero = "/home/user1/MonitorSystem/models/q4_0-orca-mini-3b.gguf"   
+    LlamaModels(model_path="/home/user1/MonitorSystem/models/q4_0-orca-mini-3b.gguf")
+    for i in range(len(pl)): 
+        event = Event()
+        prompt_thread =Thread(target= LlamaModels.queryWithEvent)
+
+
 
             
         
@@ -62,7 +69,8 @@ def main_ollama():
 
 
 if __name__ == "__main__":
-    main_ollama();
+    #main_ollama();
+    
 
 
 
