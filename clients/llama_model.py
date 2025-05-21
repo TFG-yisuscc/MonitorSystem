@@ -7,12 +7,12 @@ from metrics.promptmetrics import PromptMetrics
 from utils.llamaperformancemetrics import LLamaPerfomanceMetrics
 
 class LlamaModels(Llama):
-    def getName(self): 
+    def get_name(self):
         ruta = self.model_path;
         name = os.path.basename(ruta)
         #lo dejo con la extensión del archivo a proposito
         return name 
-    def getPerformanceMetrics(self):
+    def get_performance_metrics(self):
             param = llama_perf_context(self.ctx)
         # TODO check if its is necesary to  reset  the perf context 
         # it seesm that the only thing that remains unchanged across generations 
@@ -35,7 +35,7 @@ class LlamaModels(Llama):
         #We query the machine
         response= self(prompt)
         finish = time.time_ns()
-        return  PromptMetrics.llama_cpp_pseudoconstructor(start,finish, self.getPerformanceMetrics() ,self.getName(),prompt_id)
+        return  PromptMetrics.llama_cpp_pseudoconstructor(start, finish, self.get_performance_metrics(), self.get_name(), prompt_id)
     
     def query_event(self,prompt:str,event:Event, prompt_id=-1)-> PromptMetrics:
         #limpiaos el contexto de rendimiento
@@ -47,9 +47,9 @@ class LlamaModels(Llama):
         response= self(prompt)
         finish = time.time_ns()
         event.clear()
-        return  PromptMetrics.llama_cpp_pseudoconstructor(start,finish, self.getPerformanceMetrics() ,self.getName(),prompt_id)
+        return  PromptMetrics.llama_cpp_pseudoconstructor(start, finish, self.get_performance_metrics(), self.get_name(), prompt_id)
     def query_event_save(self,prompt:str,event:Event,filepath, prompt_id=-1): 
-        self.query_event(self,prompt:str,event:Event, prompt_id=-1).append_to_csv(filepath)
+        self.query_event(prompt:str,event:Event,prompt_id).append_to_csv(filepath)
 
         
 
