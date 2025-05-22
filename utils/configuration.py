@@ -1,5 +1,14 @@
 from utils.prompt_parser import PromptParser as ifp
 from ollama import Client
+
+
+# -----Argparser configuration-----
+DESCRIPTION = """
+
+            """
+
+
+
 # -------Configuración relacionada con los parámetros hardware----
 
 # Configuración relativa a los Prompts

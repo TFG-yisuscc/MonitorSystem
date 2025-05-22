@@ -6,7 +6,7 @@ import ollama
 from datetime import datetime
 from threading import Event, Thread
 from dataclasses import dataclass, field
-from ollama import GenerateResponse, Client,
+from ollama import GenerateResponse, Client
 from metrics.hardware_metrics import HardwareMetrics
 from utils.configuration import client_default_ollama as cdo
 from metrics.prompt_metrics import PromptMetrics
