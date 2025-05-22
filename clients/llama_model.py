@@ -17,7 +17,7 @@ class LlamaModels(Llama):
             param = llama_perf_context(self.ctx)
         # TODO check if its is necesary to  reset  the perf context 
         # it seesm that the only thing that remains unchanged across generations 
-        #is the load time  
+        #is the load time -> if you reset the performance model it changes
         #also it seem that llama doenst use all all the cores al least with the orca model
         #
             t_start_ns =  param.t_start_ms * 1e6
@@ -55,7 +55,8 @@ class LlamaModels(Llama):
         self.query_event(prompt, event, prompt_id).append_to_csv(filepath)
 
     @staticmethod
-    def test_model_gguf(model_path:str, prompt_list:list[str],time_between_prompts:float=0,freq:float=0.5):
+    def test_model_gguf(model_path:str, prompt_list:list[str],time_between_prompts:float=0,freq:float=1):
+        #TODO: Check if it works
         modelo = LlamaModels(model_path=model_path)
         current_time = datetime.now().strftime("%Y-%m-%d-%H-%M")
         prompt_metric_filepath =f"results/llama_prompt_metrics_{current_time}_{modelo.get_name()}.csv"

@@ -1,14 +1,15 @@
 """
 Placeholder description
 """
-from threading import Event
-import ollama
-from ollama import *
 import time
+import ollama
+from datetime import datetime
+from threading import Event, Thread
+from dataclasses import dataclass, field
+from ollama import GenerateResponse, Client,
+from metrics.hardware_metrics import HardwareMetrics
 from utils.configuration import client_default_ollama as cdo
 from metrics.prompt_metrics import PromptMetrics
-from dataclasses import dataclass, field
-
 
 @dataclass
 class OllamaClient(Client):
@@ -25,7 +26,6 @@ class OllamaClient(Client):
         return PromptMetrics.ollama_pseudoconstructor(start, finish, response, prompt_id)
 
     def query_event(self, prompt: str, model: str, event: Event, prompt_id: int = -1, keep_alive='2m') -> PromptMetrics:
-
         start = time.time_ns()
         event.set()
         response: GenerateResponse = self.client.generate(prompt=prompt, model=model, keep_alive=keep_alive)
@@ -47,34 +47,50 @@ class OllamaClient(Client):
         """
         OllamaClient.query_event(self, prompt, model, event, prompt_id, keep_alive).append_to_csv(filepath)
 
-    def unload_model(self, model: str):
+    def unload_model(self, model_name: str):
         #TODO mejorarlo para que cerciore que se descarga en memoria
-        self.client.generate(prompt='', model=model, keep_alive=0)
-    @staticmethod
-    def ollama_model_checker(model_list: list[str]):
-        """
-        Checks if the model is in the list of models
-        """
-        # si  esta vacia-> no se susa ollama
-        if len(model_list) == 0:
-            return
-        # si tiene elementos
+         aux = self.client.generate(prompt='', model=model_name, keep_alive=0)
 
-        #por cada elemento compruebo si ollama lo tiene idescargado y si no lo descargo
-        for model in model_list:
-            model = model.strip()
-            try:
-                ollama.show(model)
-            except ollama.ResponseError as e:
-                print(f"Model {model} not found, downloading...")
-                try:
-                    ollama.pull(model)
-                except ollama.ResponseError as e:
-                    print(e)
-                    print(f"The model {model} could not be downloaded,check for typos or for internet connection")
-                    print("Exiting the program")
-                    raise
-                else:
-                    print(f"The model {model} has been succesfully downloaded")
+    @staticmethod
+    def test(model_name:str, prompt_list:list[str],time_between_prompts:float=0,freq:float=1):
+        #TODO Check if it works
+        current_time = datetime.now().strftime("%Y-%m-%d-%H-%M")
+        prompt_metric_filepath = f"results/ollama_prompt_metrics_{current_time}_{model_name}.csv"
+        hardware_metric_filepath = f"results/ollama_hardware_metrics_{current_time}_{model_name}.csv"
+        cliente = OllamaClient()
+        for i in range(len(prompt_list)):
+            prompt = prompt_list[i]
+            evento = Event()
+            prompt_thread = Thread(target=cliente.query_event_save, args=(prompt, model_name, evento, prompt_metric_filepath, i))
+            hardware_thread = Thread(target=HardwareMetrics.update_and_save, args=(hardware_metric_filepath, evento,i,freq))
+            hardware_thread.start()
+            prompt_thread.start()
+            prompt_thread.join()
+            hardware_thread.join()
+            if len(prompt_list) -1 ==  i:
+                cliente.unload_model(model_name)
             else:
-                print(f"Model {model} already downloaded")
+                time.sleep(time_between_prompts)
+
+    @staticmethod
+    def ollama_model_checker(model_name:str):
+        """
+        Checks if the model is downloaded
+        """
+        #por cada elemento compruebo si ollama lo tiene idescargado y si no lo descargo
+        model_name = model_name.strip()
+        try:
+            ollama.show(model_name)
+        except ollama.ResponseError as e:
+            print(f"Model {model_name} not found, downloading...")
+            try:
+                ollama.pull(model_name)
+            except ollama.ResponseError as e:
+                print(e)
+                print(f"The model {model_name} could not be downloaded,check for typos or for internet connection")
+                print("Exiting the program")
+                raise
+            else:
+                print(f"The model {model_name} has been succesfully downloaded")
+        else:
+            print(f"Model {model_name} already downloaded")
