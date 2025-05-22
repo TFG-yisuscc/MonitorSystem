@@ -12,13 +12,10 @@ This class contains the following metrics  relative to prompts
 4.5 eval_duration: time in nanoseconds spent generating the response
 Apart from the ollama metrics, the class contains functions for making queries and function for csv appending
 """
-import time
 import csv
 from dataclasses import dataclass, field
-from threading import Event
-from ollama import chat, ChatResponse, Client, GenerateResponse
-from utils.llamaperformancemetrics import LLamaPerfomanceMetrics as lpm
-from utils.configuration import client_default_ollama as cd_ollama
+from ollama import GenerateResponse
+from metrics.llama_performance_metrics import LLamaPerfomanceMetrics as lpm
 
 
 @dataclass
@@ -71,9 +68,6 @@ class PromptMetrics:
         eval_duration:int = Perf.t_eval_ns
         load_duration:int= Perf.t_load_ns
         return PromptMetrics(starting_timestamp, finish_timestamp, model,total_duration,prompt_eval_count,prompt_eval_duration,eval_count,eval_duration,load_duration,prompt_id)
-
-    @staticmethod
- 
 
    #CSV related functions
     #TODO: investigate further to use logs instead of csv

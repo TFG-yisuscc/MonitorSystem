@@ -1,9 +1,6 @@
-from utils.prompt_parser import InstructionFollowingParser as ifp 
+from utils.prompt_parser import PromptParser as ifp
 from ollama import Client
 # -------Configuración relacionada con los parámetros hardware----
-FRECUENCY:float= 0.5
-TIME_BETWEEN_PROMPTS = 10.0 # in seconds 
-TIME_BETWEEN_MODELS = 3.0 *60   # three minutes should sufice since the "default" keep alive is 2 min 
 
 # Configuración relativa a los Prompts
 

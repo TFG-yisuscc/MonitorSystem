@@ -1,10 +1,11 @@
 import time
-import os 
-
-from threading import Event
+import os
+from datetime import datetime
+from threading import Event, Thread
 from llama_cpp import Llama, llama_perf_context,llama_perf_context_reset
-from metrics.promptmetrics import PromptMetrics
-from utils.llamaperformancemetrics import LLamaPerfomanceMetrics
+from metrics.prompt_metrics import PromptMetrics
+from metrics.hardware_metrics import HardwareMetrics
+from metrics.llama_performance_metrics import LLamaPerfomanceMetrics
 
 class LlamaModels(Llama):
     def get_name(self):
@@ -48,9 +49,30 @@ class LlamaModels(Llama):
         finish = time.time_ns()
         event.clear()
         return  PromptMetrics.llama_cpp_pseudoconstructor(start, finish, self.get_performance_metrics(), self.get_name(), prompt_id)
-    def query_event_save(self,prompt:str,event:Event,filepath, prompt_id=-1): 
-        self.query_event(prompt:str,event:Event,prompt_id).append_to_csv(filepath)
 
+    def query_event_save(self, prompt: str, event: Event, filepath:str,prompt_id=-1):
+        #TODO perhaps in a future t will be modified so
+        self.query_event(prompt, event, prompt_id).append_to_csv(filepath)
+
+    @staticmethod
+    def test_model_gguf(model_path:str, prompt_list:list[str],time_between_prompts:float=0,freq:float=0.5):
+        modelo = LlamaModels(model_path=model_path)
+        current_time = datetime.now().strftime("%Y-%m-%d-%H-%M")
+        prompt_metric_filepath =f"results/llama_prompt_metrics_{current_time}_{modelo.get_name()}.csv"
+        hardware_metric_filepath =f"results/llama_hardware_metrics_{current_time}_{modelo.get_name()}.csv"
+        for i in range(len(prompt_list)):
+            prompt = prompt_list[i]
+            evento = Event()
+            prompt_thread = Thread(target=modelo.query_event_save, args=(prompt, evento, prompt_metric_filepath, i))
+            hardware_thread = Thread(target=HardwareMetrics.update_and_save, args=(hardware_metric_filepath, evento,i,freq))
+            hardware_thread.start()
+            prompt_thread.start()
+            prompt_thread.join()
+            hardware_thread.join()
+            if len(prompt_list) -1 ==  i:
+                modelo.close()
+            else:
+                time.sleep(time_between_prompts)
         
 
 

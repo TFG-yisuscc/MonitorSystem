@@ -1,7 +1,7 @@
 from threading import Thread, Event
 from datetime import datetime
 from metrics.hardware_metrics import HardwareMetrics as hm
-from metrics.promptmetrics import PromptMetrics as pm
+from metrics.prompt_metrics import PromptMetrics as pm
 from clients.ollama_client import ollama_model_checker,Ollamaclient
 from clients.llama_model import LlamaModels
 from utils.configuration import TIME_BETWEEN_MODELS as tbm, TIME_BETWEEN_PROMPTS as tbp, OLLAMA_MODEL_LIST as oml, PROMPT_LIST as pl

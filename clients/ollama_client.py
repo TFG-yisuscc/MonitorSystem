@@ -6,7 +6,7 @@ import ollama
 from ollama import *
 import time
 from utils.configuration import client_default_ollama as cdo
-from metrics.promptmetrics import PromptMetrics
+from metrics.prompt_metrics import PromptMetrics
 from dataclasses import dataclass, field
 
 
@@ -48,6 +48,7 @@ class OllamaClient(Client):
         OllamaClient.query_event(self, prompt, model, event, prompt_id, keep_alive).append_to_csv(filepath)
 
     def unload_model(self, model: str):
+        #TODO mejorarlo para que cerciore que se descarga en memoria
         self.client.generate(prompt='', model=model, keep_alive=0)
     @staticmethod
     def ollama_model_checker(model_list: list[str]):
