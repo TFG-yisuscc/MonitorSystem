@@ -21,7 +21,6 @@ class LLamaPerfomanceMetrics:
         Given a llama class instance, returns its perfomance parameters
         """
         param = llama_perf_context(llm.ctx)
-        # TODO check if its is necesary to  reset  the perf context 
         # it seesm that the only thing that remains unchanged across generations 
         # is the load time
         # also it seem that llama doenst use all all the cores al least with the orca model

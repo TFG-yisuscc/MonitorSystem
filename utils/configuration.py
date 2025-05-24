@@ -13,7 +13,7 @@ DESCRIPTION = """
 
 # Configuración relativa a los Prompts
 
-PROMPT_LIST = ifp.get_instruc_eval_prompts()[0:3]
+PROMPT_LIST = ifp.get_instruc_eval_prompts()#todo re append the first prompt  at the end
 #-------Configuración relacionada con ollama-------
 #OLLAMA_MODEL_LIST =["phi4-mini:latest","deepseek-r1:1.5b","llama3.2:latest ","gemma3:1b","mistral"]
 
