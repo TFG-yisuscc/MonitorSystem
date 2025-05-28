@@ -25,7 +25,7 @@ class OllamaClient(Client):
         finish = time.time_ns()
         return PromptMetrics.ollama_pseudoconstructor(start, finish, response, prompt_id)
 
-    def query_event(self, prompt: str, model: str, event: Event, prompt_id: int = -1, keep_alive=-1) -> PromptMetrics:
+    def query_event(self, prompt: str, model: str, event: Event, prompt_id: int = -1, keep_alive='-1') -> PromptMetrics:
         start = time.time_ns()
         event.set()
         response: GenerateResponse = self.client.generate(prompt=prompt, model=model, keep_alive=keep_alive)
@@ -33,7 +33,7 @@ class OllamaClient(Client):
         event.clear()
         return PromptMetrics.ollama_pseudoconstructor(start, finish, response, prompt_id)
 
-    def query_save(self, prompt: str, model: str, filepath: str, prompt_id: int = -1, keep_alive=-1):
+    def query_save(self, prompt: str, model: str, filepath: str, prompt_id: int = -1, keep_alive='-1'):
         """
         Unifies the Queries the ollama API and saves the result to a CSV file
         Useful for threads
@@ -47,14 +47,14 @@ class OllamaClient(Client):
         """
         # prompt: str, model: str, event: Event, prompt_id: int = -1, keep_alive='2m'
         OllamaClient.query_event(self, prompt, model, event, prompt_id, keep_alive).append_to_csv(filepath)
-
+        
     def unload_model(self, model_name: str):
         #TODO mejorarlo para que cerciore que se descarga en memoria
-         aux = self.client.generate(prompt='', model=model_name, keep_alive=0)
+        aux = self.client.generate(prompt='', model=model_name, keep_alive=0)
 
     @staticmethod
     def test(model_name:str, prompt_list:list[str],time_between_prompts:float=0,freq:float=1):
-        #TODO Check if it works
+        
         OllamaClient.ollama_model_checker(model_name=model_name)
         current_time = datetime.now().strftime("%Y-%m-%d-%H-%M")
         prompt_metric_filepath = f"results/ollama_prompt_metrics_{current_time}_{model_name}.csv"
@@ -67,7 +67,7 @@ class OllamaClient(Client):
             evento = Event()
             # prompt: str, model: str, event: Event, prompt_id: int = -1, keep_alive='2m'
             #self, prompt: str, model: str, filepath: str, event: Event, prompt_id=-1, keep_alive='2m'
-            prompt_thread = Thread(target=cliente.query_event_save, args=(prompt, model_name, prompt_metric_filepath,evento, i,'-1'))
+            prompt_thread = Thread(target=cliente.query_event_save, args=(prompt, model_name, prompt_metric_filepath,evento, i,-1))
             hardware_thread = Thread(target=HardwareMetrics.update_and_save, args=(hardware_metric_filepath, evento,i,freq))
             hardware_thread.start()
             prompt_thread.start()
