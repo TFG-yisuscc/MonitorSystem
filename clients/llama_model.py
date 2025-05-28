@@ -9,10 +9,15 @@ from metrics.llama_performance_metrics import LLamaPerfomanceMetrics
 
 class LlamaModels(Llama):
     def get_name(self):
-        ruta = self.model_path;
-        name = os.path.basename(ruta)
-        #lo dejo con la extensión del archivo a proposito
-        return name 
+        name=""
+        try:
+            ruta = self.model_path;
+            name = os.path.basename(ruta)
+            #lo dejo con la extensión del archivo a proposito
+        except:
+            name = self.model_name
+        return name
+
     def get_performance_metrics(self):
             param = llama_perf_context(self.ctx)
         # TODO check if its is necesary to  reset  the perf context 
@@ -76,6 +81,33 @@ class LlamaModels(Llama):
                 modelo.close()
             else:
                 time.sleep(time_between_prompts)
+    
+    @staticmethod
+    def test_model_pretrained(model_name:str,rspositoryID:str, prompt_list:list[str],time_between_prompts:float=0,freq:float=1):
+        modelo = LlamaModels.from_pretrained(
+        repo_id="Qwen/Qwen2-0.5B-Instruct-GGUF",
+        filename="*q8_0.gguf",
+        verbose=True
+        )
+        current_time = datetime.now().strftime("%Y-%m-%d-%H-%M")
+        prompt_metric_filepath =f"results/llama_pretrained_prompt_metrics_{current_time}_{modelo.get_name()}.csv"
+        hardware_metric_filepath =f"results/llama_pretrained_hardware_metrics_{current_time}_{modelo.get_name()}.csv"
+        HardwareMetrics.create_csv_file(hardware_metric_filepath)
+        PromptMetrics.create_csv_file(prompt_metric_filepath)
+        for i in range(len(prompt_list)):
+            prompt = prompt_list[i]
+            evento = Event()
+            prompt_thread = Thread(target=modelo.query_event_save, args=(prompt, evento, prompt_metric_filepath, i))
+            hardware_thread = Thread(target=HardwareMetrics.update_and_save, args=(hardware_metric_filepath, evento,i,freq))
+            hardware_thread.start()
+            prompt_thread.start()
+            prompt_thread.join()
+            hardware_thread.join()
+            if len(prompt_list) -1 ==  i:
+                modelo.close()
+            else:
+                time.sleep(time_between_prompts)
+
         
 
 

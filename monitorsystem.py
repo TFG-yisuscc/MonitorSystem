@@ -26,6 +26,8 @@ if __name__ == "__main__":
             LlamaModels.test_model_gguf(arguments.name_or_path,PL,arguments.tbp,arguments.frequency)
         else:
             raise  FileNotFoundError("File not found or not appropriate")
+    elif arguments.source == "llama_pretrained": 
+        LlamaModels.test_model_pretrained(arguments.name_or_path, arguments.pretrained_repo, PL, arguments.tbp, arguments.frequency)
 
 
 
