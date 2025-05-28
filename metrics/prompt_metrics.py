@@ -61,7 +61,7 @@ class PromptMetrics:
     
         """
 
-        total_duration = starting_timestamp - finish_timestamp #TODO check for better solutions later
+        total_duration = finish_timestamp -starting_timestamp #TODO check for better solutions later
         prompt_eval_count:int = Perf.n_p_eval
         prompt_eval_duration:int= Perf.t_p_eval_ns
         eval_count:int = Perf.n_eval

@@ -61,6 +61,8 @@ class LlamaModels(Llama):
         current_time = datetime.now().strftime("%Y-%m-%d-%H-%M")
         prompt_metric_filepath =f"results/llama_prompt_metrics_{current_time}_{modelo.get_name()}.csv"
         hardware_metric_filepath =f"results/llama_hardware_metrics_{current_time}_{modelo.get_name()}.csv"
+        HardwareMetrics.create_csv_file(hardware_metric_filepath)
+        PromptMetrics.create_csv_file(prompt_metric_filepath)
         for i in range(len(prompt_list)):
             prompt = prompt_list[i]
             evento = Event()
