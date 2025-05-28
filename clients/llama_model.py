@@ -15,7 +15,7 @@ class LlamaModels(Llama):
             name = os.path.basename(ruta)
             #lo dejo con la extensión del archivo a proposito
         except:
-            name = self.model_name
+            name = self.model_name # Creo que no es necesario ya que el pretrainde usea el model_path 
         return name
 
     def get_performance_metrics(self):
@@ -61,7 +61,7 @@ class LlamaModels(Llama):
 
     @staticmethod
     def test_model_gguf(model_path:str, prompt_list:list[str],time_between_prompts:float=0,freq:float=1):
-        #TODO: Check if it works
+
         modelo = LlamaModels(model_path=model_path)
         current_time = datetime.now().strftime("%Y-%m-%d-%H-%M")
         prompt_metric_filepath =f"results/llama_prompt_metrics_{current_time}_{modelo.get_name()}.csv"
