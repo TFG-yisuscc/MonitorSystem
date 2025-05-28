@@ -13,8 +13,7 @@ import csv
 import os
 import subprocess
 import time
-import psutil 
-from utils.configuration import FRECUENCY as freq
+import psutil
 from threading import Thread, Lock, Event
 
 class HardwareMetrics:
@@ -102,7 +101,7 @@ class HardwareMetrics:
             file.flush()
         return row
     @staticmethod
-    def update_and_save(filepath:str,event:Event, prompt_id:int=-1):
+    def update_and_save(filepath:str,event:Event, prompt_id:int=-1,freq:float=1):
         """
         
         When the eent is set, Update the hardware metrics and save them to a CSV file every freq seconds

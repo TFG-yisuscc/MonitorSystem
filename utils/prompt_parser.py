@@ -1,5 +1,5 @@
 import json
-class InstructionFollowingParser:
+class PromptParser:
     """
   Clase para analizar un archivo JSON que contiene los promts del paper 
   Instruction-Following Evaluation for Large Language Models
@@ -8,7 +8,7 @@ class InstructionFollowingParser:
     def get_instruc_eval_prompts():
         lista_prompts = []
         ruta_fichero = "prompt_lists/instruction_following_eval_promt.jsonl"
-        #ruta_fichero = "/home/yisus/Documentos/TFG/MonitorSystem/prompt_lists/instruction_following_eval_promt.jsonl"
+
         with open(ruta_fichero,'r', encoding='utf-8')as fichero : 
             for l in fichero:
                 try:
