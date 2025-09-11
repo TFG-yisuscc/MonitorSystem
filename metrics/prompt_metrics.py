@@ -1,0 +1,109 @@
+"""
+This class contains the following metrics  relative to prompts
+1. Starting timestampt
+2. Prompt answer.
+3. Finishing timestamp
+4. Values from ollama:
+4.0 total_duration: time spent generating the response
+ 4.1load_duration: time spent in nanoseconds loading the model
+4.2prompt_eval_count: number of tokens in the prompt
+4.3 prompt_eval_duration: time spent in nanoseconds evaluating the prompt
+4.4 eval_count: number of tokens in the response
+4.5 eval_duration: time in nanoseconds spent generating the response
+Apart from the ollama metrics, the class contains functions for making queries and function for csv appending
+"""
+import csv
+from dataclasses import dataclass, field
+from ollama import GenerateResponse
+from metrics.llama_performance_metrics import LLamaPerfomanceMetrics as lpm
+
+
+@dataclass
+class PromptMetrics:
+    start_timestamp:int  # nanoseconds
+    finish_timestamp:int  # nanoseconds
+    model:str
+    total_duration:int
+    prompt_eval_count:int
+    prompt_eval_duration:int
+    eval_count:int
+    eval_duration:int
+    load_duration :int
+    #answer: str
+    prompt_id: int = field(default=-1)# Indentifies tne prompt answer relative to the rest
+    # NOTE lantency in tokesn per second has been omitted since it can be derivated
+    #and thus calculated later, the formula is(according to ollama documentation):
+    # eval_count / eval_duration * 10^9.
+    #(tough it could beimplemented by a get factory )
+
+    #Pseudo constructors
+
+    @staticmethod
+    def ollama_pseudoconstructor(starting_timestamp:int,finish_timestamp:int,prompt_answer:GenerateResponse,prompt_id:int= -1)-> 'PromptMetrics':
+        """
+        Pseudo Constructor for the prompt_metrics class
+        """
+
+        model:str = prompt_answer.model
+        total_duration:int = prompt_answer.total_duration
+        prompt_eval_count:int = prompt_answer.prompt_eval_count
+        prompt_eval_duration:int= prompt_answer.prompt_eval_duration
+        eval_count:int = prompt_answer.eval_count
+        eval_duration:int = prompt_answer.eval_duration
+        load_duration:int= prompt_answer.load_duration
+       
+        return PromptMetrics(starting_timestamp, finish_timestamp, model, total_duration,
+                             prompt_eval_count, prompt_eval_duration, eval_count, eval_duration,load_duration, prompt_id)
+    @staticmethod
+    def llama_cpp_pseudoconstructor(starting_timestamp:int,finish_timestamp:int, Perf:lpm,model:str, prompt_id:int= -1)-> 'PromptMetrics':
+        """
+       PSeudo  Constructor for the prompt_metrics class
+    
+        """
+
+        total_duration = finish_timestamp -starting_timestamp #TODO check for better solutions later
+        prompt_eval_count:int = Perf.n_p_eval
+        prompt_eval_duration:int= Perf.t_p_eval_ns
+        eval_count:int = Perf.n_eval
+        eval_duration:int = Perf.t_eval_ns
+        load_duration:int= Perf.t_load_ns
+        return PromptMetrics(starting_timestamp, finish_timestamp, model,total_duration,prompt_eval_count,prompt_eval_duration,eval_count,eval_duration,load_duration,prompt_id)
+
+   #CSV related functions
+    #TODO: investigate further to use logs instead of csv
+    @staticmethod
+    def csv_header()-> list[str]:
+        """
+        Returns a CSV--like header 
+        """
+        return ['prompt_id','start_timestamp', 'finish_timestamp', 'model', 'total_duration',
+                'prompt_eval_count', 'prompt_eval_duration', 'eval_count', 'eval_duration', 'load_duration']
+
+    @staticmethod
+    def create_csv_file(filename: str):
+        """
+        Creates a CSV and appendst the header 
+        """
+        with open(filename, mode='w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow(PromptMetrics.csv_header())
+            file.flush()
+
+    def append_to_csv(self,filepath)-> list[str]:
+        """
+        Converts the object to a CSV line
+        """
+        row = [getattr(self, attr) for attr in PromptMetrics.csv_header()]
+        with open(filepath, mode='a', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow(row)
+            file.flush()
+        return row
+
+
+
+
+        
+    
+
+

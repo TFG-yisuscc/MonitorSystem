@@ -1,5 +1,8 @@
 #https://github.com/github/gitignore/blob/main/Python.gitignore
 # libajo licencia CC0 1.0
+# archivos de este proyecto
+*.csv
+.vscode
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -141,7 +144,7 @@ venv.bak/
 # Spyder project settings
 .spyderproject
 .spyproject
-
+.gguf 
 # Rope project settings
 .ropeproject
 
@@ -174,3 +177,5 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+test.py
+models/q4_0-orca-mini-3b.gguf
