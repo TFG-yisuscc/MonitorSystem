@@ -86,6 +86,7 @@ class HardwareMetrics:
                 'swap_total', 'swap_used', 'swap_percent', 'cpu_usage', 'fan_speed']
     @staticmethod  
     def create_csv_file(filename: str):
+        os.makedirs(os.path.dirname(filename), exist_ok=True)
         with open(filename, mode='w', newline='') as file:
             writer = csv.writer(file)
             writer.writerow(HardwareMetrics.csv_header())

@@ -13,6 +13,7 @@ This class contains the following metrics  relative to prompts
 Apart from the ollama metrics, the class contains functions for making queries and function for csv appending
 """
 import csv
+import os 
 from dataclasses import dataclass, field
 from ollama import GenerateResponse
 from metrics.llama_performance_metrics import LLamaPerfomanceMetrics as lpm
@@ -84,6 +85,7 @@ class PromptMetrics:
         """
         Creates a CSV and appendst the header 
         """
+        os.makedirs(os.path.dirname(filename), exist_ok=True)
         with open(filename, mode='w', newline='') as file:
             writer = csv.writer(file)
             writer.writerow(PromptMetrics.csv_header())

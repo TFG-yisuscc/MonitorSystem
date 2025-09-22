@@ -21,7 +21,7 @@ class OllamaClient(Client):
         """
 
         start = time.time_ns()
-        response: GenerateResponse = self.client.generate(prompt=prompt, model=model, keep_alive=keep_alive)
+        response: GenerateResponse = self.client.generate(prompt=prompt, model=model, think = False, keep_alive=keep_alive)
         finish = time.time_ns()
         return PromptMetrics.ollama_pseudoconstructor(start, finish, response, prompt_id)
 

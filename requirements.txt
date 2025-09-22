@@ -1,4 +1,4 @@
-ollama~=0.4.7
+ollama
 llama-cpp-python
 huggingface-hub
-psutil~=5.9.8
+psutil

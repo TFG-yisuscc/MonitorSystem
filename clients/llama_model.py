@@ -85,8 +85,8 @@ class LlamaModels(Llama):
     @staticmethod
     def test_model_pretrained(model_name:str,rspositoryID:str, prompt_list:list[str],time_between_prompts:float=0,freq:float=1):
         modelo = LlamaModels.from_pretrained(
-        repo_id="Qwen/Qwen2-0.5B-Instruct-GGUF",
-        filename="*q8_0.gguf",
+        repo_id=rspositoryID,
+        filename=model_name,
         verbose=True
         )
         current_time = datetime.now().strftime("%Y-%m-%d-%H-%M")

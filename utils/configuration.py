@@ -21,6 +21,7 @@ PROMPT_LIST = ifp.get_instruc_eval_prompts()[0:3]#todo re append the first promp
 client_default_ollama= Client(
   
   headers={'x-some-header': 'some-value'}
+  
 )
 
 
