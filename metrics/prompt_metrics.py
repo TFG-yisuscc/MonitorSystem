@@ -104,7 +104,7 @@ class PromptMetrics:
     """
     def append_to_csv(self,logger:json_line_logger)-> list[str]:
         row = json.dumps(self.__dict__)
-        logger.log(row)
+        logger.log(msg=row)
         return row
 
 
