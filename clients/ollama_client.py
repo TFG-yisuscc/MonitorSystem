@@ -59,7 +59,7 @@ class OllamaClient(Client):
         OllamaClient.ollama_model_checker(model_name=model_name)
         current_time = datetime.now().strftime("%Y-%m-%d-%H-%M")
        # prompt_metric_filepath = f"results/ollama_prompt_metrics_{current_time}_{model_name}.csv"
-        promp_metric_log = json_line_logger.LoggerFile(f"results/ollama_prompt_metrics_{current_time}_{model_name}.csv")
+        prompt_metric_log = json_line_logger.LoggerFile(f"results/ollama_prompt_metrics_{current_time}_{model_name}.csv")
         hardware_metric_filepath = f"results/ollama_hardware_metrics_{current_time}_{model_name}.csv"
         HardwareMetrics.create_csv_file(hardware_metric_filepath)
         #PromptMetrics.create_csv_file(prompt_metric_filepath)
@@ -69,7 +69,7 @@ class OllamaClient(Client):
             evento = Event()
             # prompt: str, model: str, event: Event, prompt_id: int = -1, keep_alive='2m'
             #self, prompt: str, model: str, filepath: str, event: Event, prompt_id=-1, keep_alive='2m'
-            prompt_thread = Thread(target=cliente.query_event_save, args=(prompt, model_name, prompt_metric_filepath,evento, i,-1))
+            prompt_thread = Thread(target=cliente.query_event_save, args=(prompt, model_name, prompt_metric_log,evento, i,-1))
             hardware_thread = Thread(target=HardwareMetrics.update_and_save, args=(hardware_metric_filepath, evento,i,freq))
             hardware_thread.start()
             prompt_thread.start()
