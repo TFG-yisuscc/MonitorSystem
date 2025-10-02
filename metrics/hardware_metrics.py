@@ -15,9 +15,9 @@ import subprocess
 import time
 import psutil
 from threading import Thread, Lock, Event
-
+from utils.Inference_engines import Engine
 class HardwareMetrics:
-    def __init__(self,prompt_id=-1):
+    def __init__(self,mode:Engine = Engine.OLLAMA, prompt_id=-1):
         self.timestamp = time.time_ns();# nanoseconds
         self.prompt_id = prompt_id;
         # temperatura  CPU
@@ -46,11 +46,24 @@ class HardwareMetrics:
         self.mem_used  = mem.used;
         self.mem_percent= mem.percent;
 
-        try: #TODO with olllam it doesn work since it uses different pid from the script, check with llama
-            pid = os.getpid()
-            process = psutil.Process(pid)
-            self.mem_pid = process.memory_info().rss;
-            self.cpu_usage_pid = process.cpu_percent();
+        try:
+            usuario = "";
+            if(mode == Engine.OLLAMA):
+                usuario = "ollama"
+            elif(mode == Engine.LLAMA):
+                usuario = "python" #TODO: Depende de como se utilice llama
+            else:
+                pass
+            #TODO Verificar que funcione
+            cmd_mem_percent = f"ps -u {usuario} -o %mem= | awk '{{sum += $1}} END {{print sum}}'"
+            cmd_rss = f"ps -u {usuario} -o rss= | awk '{{sum += $1}} END {{print sum}}'"
+            cmd_cpu = f"ps -u {usuario} -o %cpu= | awk '{{sum += $1}} END {{print sum}}'"
+            cmd_output1 = subprocess.check_output(cmd_cpu).decode("utf-8")
+            cmd_output2 = subprocess.check_output(cmd_mem_percent).decode("utf-8")
+            cmd_output3 = subprocess.check_output(cmd_rss).decode("utf-8")
+
+
+
         except:
             self.mem_pid = -1;
             self.cpu_usage_pid=-1;
@@ -80,9 +93,9 @@ class HardwareMetrics:
 
     
     @staticmethod
-    def csv_header()->list[str]:
+    def csv_header()->list[str]: #readd the user versions
         return ['timestamp', 'prompt_id', 'temperature', 'frequency', 'voltage', 'throttling',
-                'mem_total', 'mem_used', 'mem_percent', 'mem_pid', 'cpu_usage_pid',
+                'mem_total', 'mem_used', 'mem_percent',
                 'swap_total', 'swap_used', 'swap_percent', 'cpu_usage', 'fan_speed']
     @staticmethod  
     def create_csv_file(filename: str):
