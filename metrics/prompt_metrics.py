@@ -13,7 +13,9 @@ This class contains the following metrics  relative to prompts
 Apart from the ollama metrics, the class contains functions for making queries and function for csv appending
 """
 import csv
-import os 
+import json
+import os
+import json_line_logger
 from dataclasses import dataclass, field
 from ollama import GenerateResponse
 from metrics.llama_performance_metrics import LLamaPerfomanceMetrics as lpm
@@ -91,15 +93,18 @@ class PromptMetrics:
             writer.writerow(PromptMetrics.csv_header())
             file.flush()
 
-    def append_to_csv(self,filepath)-> list[str]:
-        """
-        Converts the object to a CSV line
-        """
+    """
+        def append_to_csv(self,filepath)-> list[str]:
         row = [getattr(self, attr) for attr in PromptMetrics.csv_header()]
         with open(filepath, mode='a', newline='') as file:
             writer = csv.writer(file)
             writer.writerow(row)
             file.flush()
+        return row
+    """
+    def append_to_csv(self,logger:json_line_logger)-> list[str]:
+        row = json.dump(self.__dict__)
+        logger.log(row)
         return row
 
 
