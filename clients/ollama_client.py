@@ -3,6 +3,7 @@ Placeholder description
 """
 import time
 import ollama
+import json_line_logger
 from datetime import datetime
 from threading import Event, Thread
 from dataclasses import dataclass, field
@@ -40,7 +41,7 @@ class OllamaClient(Client):
         """
         OllamaClient.query(self, prompt, model, prompt_id, keep_alive).append_to_csv(filepath)
 
-    def query_event_save(self, prompt: str, model: str, filepath: str, event: Event, prompt_id=-1, keep_alive=-1):
+    def query_event_save(self, prompt: str, model: str, filepath:json_line_logger, event: Event, prompt_id=-1, keep_alive="-1"):
         """
         Unifies the Queries the ollama API and saves the result to a CSV file
         Useful for threads
@@ -57,7 +58,8 @@ class OllamaClient(Client):
         
         OllamaClient.ollama_model_checker(model_name=model_name)
         current_time = datetime.now().strftime("%Y-%m-%d-%H-%M")
-        prompt_metric_filepath = f"results/ollama_prompt_metrics_{current_time}_{model_name}.csv"
+       # prompt_metric_filepath = f"results/ollama_prompt_metrics_{current_time}_{model_name}.csv"
+        promp_metric_log = json_line_logger.LoggerFile(f"results/ollama_prompt_metrics_{current_time}_{model_name}.csv")
         hardware_metric_filepath = f"results/ollama_hardware_metrics_{current_time}_{model_name}.csv"
         HardwareMetrics.create_csv_file(hardware_metric_filepath)
         PromptMetrics.create_csv_file(prompt_metric_filepath)
