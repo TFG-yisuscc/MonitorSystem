@@ -10,6 +10,8 @@ THis class measures the following hardware metrics
 8. NOt implemented, power consumtion-> aparently it cannot be done reliably by software
 """
 import csv
+import json
+import logging
 import os
 import subprocess
 import time
@@ -107,23 +109,27 @@ class HardwareMetrics:
         
         
 
-    def append_to_csv_file(self,filepath: str):
+    """def append_to_csv_file(self,filepath: str):
         row= [getattr(self, attr) for attr in HardwareMetrics.csv_header()]
         with open(filepath, mode='a', newline='') as file:
             writer = csv.writer(file)
             writer.writerow(row)
             file.flush()
+        return row"""
+    def append_to_csv_file(self,logger:logging.Logger)->str:
+        row= json.dumps(self.__dict__)
+        logger.info(row)
         return row
     @staticmethod
-    def update_and_save(filepath:str,event:Event, prompt_id:int=-1,freq:float=1):
+    def update_and_save(logger:logging.Logger,event:Event,mode:Engine, prompt_id:int=-1,freq:float=0.5):
         """
         
         When the eent is set, Update the hardware metrics and save them to a CSV file every freq seconds
         """
-        HardwareMetrics() # this is done to avoid getting a 0.0 cpu freq
+        HardwareMetrics(mode,prompt_id) # this is done to avoid getting a 0.0 cpu freq
         event.wait()
         while event.is_set(): #TODO mejorar con update
-            HardwareMetrics(prompt_id).append_to_csv_file(filepath)
+            HardwareMetrics(mode,prompt_id).append_to_csv_file(logger)
             time.sleep(freq)
             
     

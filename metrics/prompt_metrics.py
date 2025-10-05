@@ -15,6 +15,7 @@ Apart from the ollama metrics, the class contains functions for making queries a
 import csv
 import json
 import os
+import logging
 import json_line_logger
 from dataclasses import dataclass, field
 from ollama import GenerateResponse
@@ -32,7 +33,7 @@ class PromptMetrics:
     eval_count:int
     eval_duration:int
     load_duration :int
-    #answer: str
+    answer: str= field(default="")
     prompt_id: int = field(default=-1)# Indentifies tne prompt answer relative to the rest
     # NOTE lantency in tokesn per second has been omitted since it can be derivated
     #and thus calculated later, the formula is(according to ollama documentation):
@@ -46,7 +47,7 @@ class PromptMetrics:
         """
         Pseudo Constructor for the prompt_metrics class
         """
-
+        
         model:str = prompt_answer.model
         total_duration:int = prompt_answer.total_duration
         prompt_eval_count:int = prompt_answer.prompt_eval_count
@@ -54,9 +55,9 @@ class PromptMetrics:
         eval_count:int = prompt_answer.eval_count
         eval_duration:int = prompt_answer.eval_duration
         load_duration:int= prompt_answer.load_duration
-       
+        answer = prompt_answer.response
         return PromptMetrics(starting_timestamp, finish_timestamp, model, total_duration,
-                             prompt_eval_count, prompt_eval_duration, eval_count, eval_duration,load_duration, prompt_id)
+                             prompt_eval_count, prompt_eval_duration, eval_count, eval_duration,load_duration,answer,prompt_id)
     @staticmethod
     def llama_cpp_pseudoconstructor(starting_timestamp:int,finish_timestamp:int, Perf:lpm,model:str, prompt_id:int= -1)-> 'PromptMetrics':
         """
@@ -102,9 +103,10 @@ class PromptMetrics:
             file.flush()
         return row
     """
-    def append_to_csv(self,logger:json_line_logger)-> list[str]:
+
+    def append_to_csv(self, logger: logging.Logger) -> str: 
         row = json.dumps(self.__dict__)
-        logger.log(msg=row)
+        logger.info(row)
         return row
 
 
