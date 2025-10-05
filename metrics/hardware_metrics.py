@@ -56,22 +56,25 @@ class HardwareMetrics:
                 usuario = "ollama"
             elif(mode == Engine.LLAMA):
                 usuario = "python" #TODO:  ver como a¡afecta el  multitrheading 
-            else:
-                pass
+
             #TODO Verificar que funcione
+            
             cmd_mem_percent = f"ps -u {usuario} -o %mem= | awk '{{sum += $1}} END {{print sum}}'"
             cmd_rss = f"ps -u {usuario} -o rss= | awk '{{sum += $1}} END {{print sum}}'"
             cmd_cpu = f"ps -u {usuario} -o %cpu= | awk '{{sum += $1}} END {{print sum}}'"
-            cmd_output1 = subprocess.check_output(cmd_cpu).decode("utf-8")
-            
-            cmd_output2 = subprocess.check_output(cmd_mem_percent).decode("utf-8")
-            cmd_output3 = subprocess.check_output(cmd_rss).decode("utf-8")
+            cmd_output1 = subprocess.check_output(cmd_cpu,shell=True).decode("utf-8")
+            cmd_output2 = subprocess.check_output(cmd_mem_percent,shell=True).decode("utf-8")
+            cmd_output3 = subprocess.check_output(cmd_rss,shell=True).decode("utf-8")
+            self.cpu_usage_user =int(cmd_output1)
+            self.mem_user = int(cmd_output3)
+            self.mem_percent_user = float(cmd_output2)
 
 
 
         except:
-            self.mem_pid = -1;
-            self.cpu_usage_pid=-1;
+            self.mem_user = -1;
+            self.cpu_usage_user=-1;
+            self.mem_percent_user = -1;
 
             # swap
         swap = psutil.swap_memory();
