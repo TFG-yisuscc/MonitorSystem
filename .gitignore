@@ -179,3 +179,4 @@ cython_debug/
 .pypirc
 test.py
 models/q4_0-orca-mini-3b.gguf
+results/*.jsonl

@@ -12,6 +12,7 @@ from ollama import GenerateResponse, Client
 from metrics.hardware_metrics import HardwareMetrics
 from utils.configuration import client_default_ollama as cdo
 from metrics.prompt_metrics import PromptMetrics
+from utils.Inference_engines import Engine
 
 @dataclass
 class OllamaClient(Client):
@@ -85,10 +86,17 @@ class OllamaClient(Client):
         for i in range(len(prompt_list)):
             prompt = prompt_list[i]
             evento = Event()
-            # prompt: str, model: str, event: Event, prompt_id: int = -1, keep_alive='2m'
-            #self, prompt: str, model: str, filepath: str, event: Event, prompt_id=-1, keep_alive='2m'
+            #update_and_save(logger:logging.Logger,event:Event,mode:Engine, prompt_id:int=-1,freq:float=0.5):
             prompt_thread = Thread(target=cliente.query_event_save, args=(prompt, model_name, prompt_metric_log,evento, i,-1))
-            hardware_thread = Thread(target=HardwareMetrics.update_and_save, args=(hardware_metric_log, evento,i,freq))
+            hardware_thread = Thread(target=HardwareMetrics.update_and_save,
+                                       kwargs={
+                                            'logger': hardware_metric_log,
+                                            'event': evento,
+                                            'mode':Engine.OLLAMA,
+                                            'prompt_id': i,
+                                            'freq': freq
+                                })
+
             hardware_thread.start()
             prompt_thread.start()
             prompt_thread.join()

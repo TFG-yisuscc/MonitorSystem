@@ -9,9 +9,10 @@ parser.add_argument('source', type=str, choices=["ollama", "llama_gguf", "llama_
                     help="Option to indicate the procendency of the model.It can be ollama, llama_gguf or llama_pretrained")
 parser.add_argument("name_or_path", type=str,
                     help="Ollama: Name of the model, llama_gguf: absolute path of the model, llama_pretrained:filename")
-parser.add_argument("-r","--pretrained_repo",type=str, help="Huggingface repository id , only requrired when using llama_pretrained")
-parser.add_argument("-f","--frequency", type=float, default=1,help="Frequency of hardware measurements")
+parser.add_argument("-r","--pretrained_repo",type=str, help="Huggingface repository id , only required when using llama_pretrained")
+parser.add_argument("-f","--frequency", type=float, default=0.5,help="Frequency of hardware measurements")
 parser.add_argument("-t","--tbp", type=float, default=0,help="Wait time between prompts")
+parser.add_argument("-c","--conversion", type=float, default=0,help=" UNIMPLEMENTED Merges the hardware fand prompt finels into one for each testbench")
 
 
 

@@ -8,7 +8,9 @@ THis class measures the following hardware metrics
 6. Mamory and swap usage of the whole pi and process
 7. Fan usage (in RPM) try cached if it cannot find a fan
 8. NOt implemented, power consumtion-> aparently it cannot be done reliably by software
+
 """
+#TODO  Refactorizar los nobres de la s variables y funciones asociadas al alcsv 
 import csv
 import json
 import logging
@@ -53,7 +55,7 @@ class HardwareMetrics:
             if(mode == Engine.OLLAMA):
                 usuario = "ollama"
             elif(mode == Engine.LLAMA):
-                usuario = "python" #TODO: Depende de como se utilice llama
+                usuario = "python" #TODO:  ver como a¡afecta el  multitrheading 
             else:
                 pass
             #TODO Verificar que funcione
@@ -61,6 +63,7 @@ class HardwareMetrics:
             cmd_rss = f"ps -u {usuario} -o rss= | awk '{{sum += $1}} END {{print sum}}'"
             cmd_cpu = f"ps -u {usuario} -o %cpu= | awk '{{sum += $1}} END {{print sum}}'"
             cmd_output1 = subprocess.check_output(cmd_cpu).decode("utf-8")
+            
             cmd_output2 = subprocess.check_output(cmd_mem_percent).decode("utf-8")
             cmd_output3 = subprocess.check_output(cmd_rss).decode("utf-8")
 
@@ -121,6 +124,7 @@ class HardwareMetrics:
         logger.info(row)
         return row
     @staticmethod
+   
     def update_and_save(logger:logging.Logger,event:Event,mode:Engine, prompt_id:int=-1,freq:float=0.5):
         """
         
