@@ -13,6 +13,7 @@ from metrics.hardware_metrics import HardwareMetrics
 from utils.configuration import client_default_ollama as cdo
 from metrics.prompt_metrics import PromptMetrics
 from utils.Inference_engines import Engine
+from utils.metric_logger import create_loggers
 
 @dataclass
 class OllamaClient(Client):
@@ -60,28 +61,7 @@ class OllamaClient(Client):
         
         OllamaClient.ollama_model_checker(model_name=model_name)
         current_time = datetime.now().strftime("%Y-%m-%d-%H-%M")
-        
-        # Configurar el logger para las métricas de prompts
-        prompt_log_filename = f"results/ollama_prompt_metrics_{current_time}_{model_name}.jsonl"
-        prompt_metric_log = logging.getLogger('prompt_metrics')
-        prompt_metric_log.setLevel(logging.INFO)
-        
-        # Limpiar handlers existentes para evitar duplicados
-        prompt_metric_log.handlers.clear()
-        
-        # Crear handler de archivo
-        handler = logging.FileHandler(prompt_log_filename, mode='w')
-        handler.setFormatter(logging.Formatter('%(message)s'))
-        prompt_metric_log.addHandler(handler)
-        
-        #hardware_metric_filepath = f"results/ollama_hardware_metrics_{current_time}_{model_name}.csv"
-        hardware_log_filename = f"results/ollama_hardware_metrics_{current_time}_{model_name}.jsonl"
-        hardware_metric_log = logging.getLogger('hardware_metrics')
-        hardware_metric_log.setLevel(logging.INFO)
-        hardware_metric_log.handlers.clear()
-        h_handler = logging.FileHandler(hardware_log_filename, mode='w')
-        h_handler.setFormatter(logging.Formatter('%(message)s'))
-        hardware_metric_log.addHandler(h_handler)
+        hardware_metric_log, prompt_metric_log = create_loggers(model_name=model_name, inferenceEngine=Engine.OLLAMA.name,current_time=current_time)
         cliente = OllamaClient()
         for i in range(len(prompt_list)):
             prompt = prompt_list[i]

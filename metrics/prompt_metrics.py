@@ -33,7 +33,7 @@ class PromptMetrics:
     eval_count:int
     eval_duration:int
     load_duration :int
-    answer: str= field(default="")
+    answer: str= field(default="NONE")
     prompt_id: int = field(default=-1)# Indentifies tne prompt answer relative to the rest
     # NOTE lantency in tokesn per second has been omitted since it can be derivated
     #and thus calculated later, the formula is(according to ollama documentation):
@@ -59,7 +59,7 @@ class PromptMetrics:
         return PromptMetrics(starting_timestamp, finish_timestamp, model, total_duration,
                              prompt_eval_count, prompt_eval_duration, eval_count, eval_duration,load_duration,answer,prompt_id)
     @staticmethod
-    def llama_cpp_pseudoconstructor(starting_timestamp:int,finish_timestamp:int, Perf:lpm,model:str, prompt_id:int= -1)-> 'PromptMetrics':
+    def llama_cpp_pseudoconstructor(starting_timestamp:int,finish_timestamp:int, Perf:lpm,model:str,answer, prompt_id:int= -1)-> 'PromptMetrics':
         """
        PSeudo  Constructor for the prompt_metrics class
     
