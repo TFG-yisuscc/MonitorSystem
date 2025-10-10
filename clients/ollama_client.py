@@ -61,7 +61,7 @@ class OllamaClient(Client):
         
         OllamaClient.ollama_model_checker(model_name=model_name)
         current_time = datetime.now().strftime("%Y-%m-%d-%H-%M")
-        hardware_metric_log, prompt_metric_log = create_loggers(model_name=model_name, inferenceEngine=Engine.OLLAMA.name,current_time=current_time)
+        hardware_metric_log, prompt_metric_log = create_loggers(model_name=model_name.replace("/", "-"), inferenceEngine=Engine.OLLAMA.name,current_time=current_time)
         cliente = OllamaClient()
         for i in range(len(prompt_list)):
             prompt = prompt_list[i]

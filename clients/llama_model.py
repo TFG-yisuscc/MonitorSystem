@@ -14,11 +14,11 @@ class LlamaModels(Llama):
     def get_name(self):
         name=""
         try:
-            ruta = self.model_path;
+            ruta = self.model_path
             name = os.path.basename(ruta)
             #lo dejo con la extensión del archivo a proposito
-        except:
-            name = self.model_name # Creo que no es necesario ya que el pretrainde usea el model_path 
+        except Exception:
+            name = "Unknown"
         return name
 
     def get_performance_metrics(self):
@@ -44,7 +44,7 @@ class LlamaModels(Llama):
         #We query the machine
         answer = self(prompt)
         finish = time.time_ns()
-        return  PromptMetrics.llama_cpp_pseudoconstructor(start, finish, self.get_performance_metrics(), self.get_name(),response, prompt_id)
+        return  PromptMetrics.llama_cpp_pseudoconstructor(start, finish, self.get_performance_metrics(), self.get_name(),answer, prompt_id)
     
     def query_event(self,prompt:str,event:Event, prompt_id=-1)-> PromptMetrics:
         #limpiaos el contexto de rendimiento
@@ -54,6 +54,7 @@ class LlamaModels(Llama):
         start= time.time_ns()
         #We query the machine
         answer= self(prompt)
+        print(answer)
         finish = time.time_ns()
         event.clear()
 
@@ -86,9 +87,9 @@ class LlamaModels(Llama):
     @staticmethod
     def test_model_pretrained(model_name:str,rspositoryID:str, prompt_list:list[str],time_between_prompts:float=0,freq:float=1):
         modelo = LlamaModels.from_pretrained(
-        repo_id=rspositoryID,
-        filename=model_name,
-        verbose=True
+            repo_id=rspositoryID,
+            filename=model_name,
+            verbose=True
         )
         current_time = datetime.now().strftime("%Y-%m-%d-%H-%M")
         hardware_metric_log, prompt_metric_log = create_loggers(Engine.LLAMA.name,current_time,model_name=modelo.get_name())
