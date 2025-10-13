@@ -8,8 +8,12 @@ THis class measures the following hardware metrics
 6. Mamory and swap usage of the whole pi and process
 7. Fan usage (in RPM) try cached if it cannot find a fan
 8. NOt implemented, power consumtion-> aparently it cannot be done reliably by software
+
 """
+#TODO  Refactorizar los nobres de la s variables y funciones asociadas al alcsv 
 import csv
+import json
+import logging
 import os
 import subprocess
 import time
@@ -25,13 +29,15 @@ class HardwareMetrics:
         self.temperature = float(cmd_output.split("=")[1][:-3])
         # frecuecia
         cmd_output = subprocess.check_output(["vcgencmd", "measure_clock", "arm"]).decode("utf-8")
-        self.frequency = int(cmd_output.split("=")[1], 16)
+        self.frequency = int(cmd_output.split("=")[1])
         # voltaje cpu
         cmd_output = subprocess.check_output(["vcgencmd", "measure_volts", "core"]).decode("utf-8")
         self.voltage = float(cmd_output.split("=")[1][:-2])
         # trhottling
         cmd_output = subprocess.check_output(["vcgencmd", "get_throttled"]).decode("utf-8")
         self.throttling = int(cmd_output.strip().split("=")[1].split("\"")[0], 16)
+        
+
         #memoria y swap
         """"
         VCGENCMD should not  be used in this case
@@ -46,27 +52,45 @@ class HardwareMetrics:
         self.mem_used  = mem.used;
         self.mem_percent= mem.percent;
 
-        try:
-            usuario = "";
-            if(mode == Engine.OLLAMA):
-                usuario = "ollama"
-            elif(mode == Engine.LLAMA):
-                usuario = "python" #TODO: Depende de como se utilice llama
-            else:
-                pass
-            #TODO Verificar que funcione
+        cmd_mem_percent = "echo -1";
+        cmd_rss = "echo -1";
+        cmd_cpu = "echo -1.0";
+        usuario = "";
+        if(mode == Engine.OLLAMA):
+            usuario = "ollama"
             cmd_mem_percent = f"ps -u {usuario} -o %mem= | awk '{{sum += $1}} END {{print sum}}'"
             cmd_rss = f"ps -u {usuario} -o rss= | awk '{{sum += $1}} END {{print sum}}'"
             cmd_cpu = f"ps -u {usuario} -o %cpu= | awk '{{sum += $1}} END {{print sum}}'"
-            cmd_output1 = subprocess.check_output(cmd_cpu).decode("utf-8")
-            cmd_output2 = subprocess.check_output(cmd_mem_percent).decode("utf-8")
-            cmd_output3 = subprocess.check_output(cmd_rss).decode("utf-8")
+        elif(mode == Engine.LLAMA):
+            usuario = "python" #TODO:  ver como a¡afecta el  multitrheading 
+            cmd_mem_percent = f"ps -C {usuario} -o %mem= | awk '{{sum += $1}} END {{print sum}}'"
+            cmd_rss = f"ps -C {usuario} -o rss= | awk '{{sum += $1}} END {{print sum}}'"
+            cmd_cpu = f"ps -C {usuario} -o %cpu= | awk '{{sum += $1}} END {{print sum}}'"
+
+        #TODO Verificar que funcione
+        
+
+        try:
+            cmd_output_cpu = subprocess.check_output(cmd_cpu, shell=True).decode("utf-8")
+            self.cpu_usage_user = float(cmd_output_cpu)
+        except Exception as e:
+            self.cpu_usage_user = -1.0
+
+        try:
+            cmd_output_mem_percent = subprocess.check_output(cmd_mem_percent, shell=True).decode("utf-8")
+            self.mem_percent_user = float(cmd_output_mem_percent)
+        except Exception as e:
+            self.mem_percent_user = -1.0
+
+        try:
+            cmd_output_rss = subprocess.check_output(cmd_rss, shell=True).decode("utf-8")
+            self.mem_user = int(cmd_output_rss)
+        except Exception as e:
+            self.mem_user = -1
 
 
 
-        except:
-            self.mem_pid = -1;
-            self.cpu_usage_pid=-1;
+    
 
             # swap
         swap = psutil.swap_memory();
@@ -107,23 +131,28 @@ class HardwareMetrics:
         
         
 
-    def append_to_csv_file(self,filepath: str):
+    """def append_to_csv_file(self,filepath: str):
         row= [getattr(self, attr) for attr in HardwareMetrics.csv_header()]
         with open(filepath, mode='a', newline='') as file:
             writer = csv.writer(file)
             writer.writerow(row)
             file.flush()
+        return row"""
+    def append_to_csv_file(self,logger:logging.Logger)->str:
+        row= json.dumps(self.__dict__)
+        logger.info(row)
         return row
     @staticmethod
-    def update_and_save(filepath:str,event:Event, prompt_id:int=-1,freq:float=1):
+   
+    def update_and_save(logger:logging.Logger,event:Event,mode:Engine, prompt_id:int=-1,freq:float=0.5):
         """
         
         When the eent is set, Update the hardware metrics and save them to a CSV file every freq seconds
         """
-        HardwareMetrics() # this is done to avoid getting a 0.0 cpu freq
+        HardwareMetrics(mode,prompt_id) # this is done to avoid getting a 0.0 cpu freq
         event.wait()
         while event.is_set(): #TODO mejorar con update
-            HardwareMetrics(prompt_id).append_to_csv_file(filepath)
+            HardwareMetrics(mode,prompt_id).append_to_csv_file(logger)
             time.sleep(freq)
             
     

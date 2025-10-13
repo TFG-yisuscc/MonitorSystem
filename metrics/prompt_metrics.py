@@ -13,7 +13,9 @@ This class contains the following metrics  relative to prompts
 Apart from the ollama metrics, the class contains functions for making queries and function for csv appending
 """
 import csv
-import os 
+import json
+import os
+import logging
 from dataclasses import dataclass, field
 from ollama import GenerateResponse
 from metrics.llama_performance_metrics import LLamaPerfomanceMetrics as lpm
@@ -30,7 +32,7 @@ class PromptMetrics:
     eval_count:int
     eval_duration:int
     load_duration :int
-    #answer: str
+    answer: str= field(default="NONE")
     prompt_id: int = field(default=-1)# Indentifies tne prompt answer relative to the rest
     # NOTE lantency in tokesn per second has been omitted since it can be derivated
     #and thus calculated later, the formula is(according to ollama documentation):
@@ -44,19 +46,19 @@ class PromptMetrics:
         """
         Pseudo Constructor for the prompt_metrics class
         """
-
-        model:str = prompt_answer.model
-        total_duration:int = prompt_answer.total_duration
-        prompt_eval_count:int = prompt_answer.prompt_eval_count
-        prompt_eval_duration:int= prompt_answer.prompt_eval_duration
-        eval_count:int = prompt_answer.eval_count
-        eval_duration:int = prompt_answer.eval_duration
-        load_duration:int= prompt_answer.load_duration
-       
+        
+        model: str = prompt_answer.model if prompt_answer.model is not None else "unknown"
+        total_duration: int = prompt_answer.total_duration if prompt_answer.total_duration is not None else 0
+        prompt_eval_count: int = prompt_answer.prompt_eval_count if prompt_answer.prompt_eval_count is not None else 0
+        prompt_eval_duration: int = prompt_answer.prompt_eval_duration if prompt_answer.prompt_eval_duration is not None else 0
+        eval_count: int = prompt_answer.eval_count if prompt_answer.eval_count is not None else 0
+        eval_duration: int = prompt_answer.eval_duration if prompt_answer.eval_duration is not None else 0
+        load_duration: int = prompt_answer.load_duration if prompt_answer.load_duration is not None else 0
+        answer: str = prompt_answer.response if prompt_answer.response is not None else "NONE"
         return PromptMetrics(starting_timestamp, finish_timestamp, model, total_duration,
-                             prompt_eval_count, prompt_eval_duration, eval_count, eval_duration,load_duration, prompt_id)
+                             prompt_eval_count, prompt_eval_duration, eval_count, eval_duration,load_duration,answer,prompt_id)
     @staticmethod
-    def llama_cpp_pseudoconstructor(starting_timestamp:int,finish_timestamp:int, Perf:lpm,model:str, prompt_id:int= -1)-> 'PromptMetrics':
+    def llama_cpp_pseudoconstructor(starting_timestamp:int,finish_timestamp:int, Perf:lpm,model:str,answer, prompt_id:int= -1)-> 'PromptMetrics':
         """
        PSeudo  Constructor for the prompt_metrics class
     
@@ -68,7 +70,8 @@ class PromptMetrics:
         eval_count:int = Perf.n_eval
         eval_duration:int = Perf.t_eval_ns
         load_duration:int= Perf.t_load_ns
-        return PromptMetrics(starting_timestamp, finish_timestamp, model,total_duration,prompt_eval_count,prompt_eval_duration,eval_count,eval_duration,load_duration,prompt_id)
+        answer = answer["choices"][0]["text"].strip()
+        return PromptMetrics(starting_timestamp, finish_timestamp, model,total_duration,prompt_eval_count,prompt_eval_duration,eval_count,eval_duration,load_duration,answer,prompt_id)
 
    #CSV related functions
     #TODO: investigate further to use logs instead of csv
@@ -91,15 +94,19 @@ class PromptMetrics:
             writer.writerow(PromptMetrics.csv_header())
             file.flush()
 
-    def append_to_csv(self,filepath)-> list[str]:
-        """
-        Converts the object to a CSV line
-        """
+    """
+        def append_to_csv(self,filepath)-> list[str]:
         row = [getattr(self, attr) for attr in PromptMetrics.csv_header()]
         with open(filepath, mode='a', newline='') as file:
             writer = csv.writer(file)
             writer.writerow(row)
             file.flush()
+        return row
+    """
+
+    def append_to_csv(self, logger: logging.Logger) -> str: 
+        row = json.dumps(self.__dict__)
+        logger.info(row)
         return row
 
 
