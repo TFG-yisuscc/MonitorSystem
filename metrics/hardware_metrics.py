@@ -29,13 +29,15 @@ class HardwareMetrics:
         self.temperature = float(cmd_output.split("=")[1][:-3])
         # frecuecia
         cmd_output = subprocess.check_output(["vcgencmd", "measure_clock", "arm"]).decode("utf-8")
-        self.frequency = int(cmd_output.split("=")[1], 16)
+        self.frequency = int(cmd_output.split("=")[1])
         # voltaje cpu
         cmd_output = subprocess.check_output(["vcgencmd", "measure_volts", "core"]).decode("utf-8")
         self.voltage = float(cmd_output.split("=")[1][:-2])
         # trhottling
         cmd_output = subprocess.check_output(["vcgencmd", "get_throttled"]).decode("utf-8")
         self.throttling = int(cmd_output.strip().split("=")[1].split("\"")[0], 16)
+        
+
         #memoria y swap
         """"
         VCGENCMD should not  be used in this case
@@ -50,31 +52,45 @@ class HardwareMetrics:
         self.mem_used  = mem.used;
         self.mem_percent= mem.percent;
 
-        try:
-            usuario = "";
-            if(mode == Engine.OLLAMA):
-                usuario = "ollama"
-            elif(mode == Engine.LLAMA):
-                usuario = "python" #TODO:  ver como a¡afecta el  multitrheading 
-
-            #TODO Verificar que funcione
-            
+        cmd_mem_percent = "echo -1";
+        cmd_rss = "echo -1";
+        cmd_cpu = "echo -1.0";
+        usuario = "";
+        if(mode == Engine.OLLAMA):
+            usuario = "ollama"
             cmd_mem_percent = f"ps -u {usuario} -o %mem= | awk '{{sum += $1}} END {{print sum}}'"
             cmd_rss = f"ps -u {usuario} -o rss= | awk '{{sum += $1}} END {{print sum}}'"
             cmd_cpu = f"ps -u {usuario} -o %cpu= | awk '{{sum += $1}} END {{print sum}}'"
-            cmd_output1 = subprocess.check_output(cmd_cpu,shell=True).decode("utf-8")
-            cmd_output2 = subprocess.check_output(cmd_mem_percent,shell=True).decode("utf-8")
-            cmd_output3 = subprocess.check_output(cmd_rss,shell=True).decode("utf-8")
-            self.cpu_usage_user =int(cmd_output1)
-            self.mem_user = int(cmd_output3)
-            self.mem_percent_user = float(cmd_output2)
+        elif(mode == Engine.LLAMA):
+            usuario = "python" #TODO:  ver como a¡afecta el  multitrheading 
+            cmd_mem_percent = f"ps -C {usuario} -o %mem= | awk '{{sum += $1}} END {{print sum}}'"
+            cmd_rss = f"ps -C {usuario} -o rss= | awk '{{sum += $1}} END {{print sum}}'"
+            cmd_cpu = f"ps -C {usuario} -o %cpu= | awk '{{sum += $1}} END {{print sum}}'"
+
+        #TODO Verificar que funcione
+        
+
+        try:
+            cmd_output_cpu = subprocess.check_output(cmd_cpu, shell=True).decode("utf-8")
+            self.cpu_usage_user = float(cmd_output_cpu)
+        except Exception as e:
+            self.cpu_usage_user = -1.0
+
+        try:
+            cmd_output_mem_percent = subprocess.check_output(cmd_mem_percent, shell=True).decode("utf-8")
+            self.mem_percent_user = float(cmd_output_mem_percent)
+        except Exception as e:
+            self.mem_percent_user = -1.0
+
+        try:
+            cmd_output_rss = subprocess.check_output(cmd_rss, shell=True).decode("utf-8")
+            self.mem_user = int(cmd_output_rss)
+        except Exception as e:
+            self.mem_user = -1
 
 
 
-        except:
-            self.mem_user = -1;
-            self.cpu_usage_user=-1;
-            self.mem_percent_user = -1;
+    
 
             # swap
         swap = psutil.swap_memory();
